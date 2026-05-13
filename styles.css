@@ -84,7 +84,7 @@ nav a:hover {
 }
 
 .hero {
-  padding: clamp(68px, 10vw, 116px) 0 46px;
+  padding: clamp(42px, 7vw, 76px) 0 46px;
 }
 
 .hero-copy {
@@ -95,7 +95,7 @@ nav a:hover {
   display: flex;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: clamp(46px, 8vw, 82px);
+  margin-top: 34px;
   color: var(--muted);
   font-family: "Courier New", Courier, monospace;
   font-size: 0.86rem;
@@ -318,13 +318,13 @@ p {
   }
 
   .hero {
-    padding-top: 58px;
+    padding-top: 40px;
   }
 
   .hero-meta {
     display: grid;
     gap: 8px;
-    margin-bottom: 42px;
+    margin-top: 28px;
   }
 
   h1 {
