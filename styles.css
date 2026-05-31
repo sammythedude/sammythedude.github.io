@@ -263,26 +263,16 @@ h3 {
 }
 
 .tag-inline {
-  display: inline-block;
-  padding: 0 0.32rem;
-  border: 1px solid currentColor;
-  border-radius: 0.35rem;
   font-weight: 700;
-  line-height: 1.45;
-  white-space: nowrap;
 }
 
 .tag-inline.bio {
   color: var(--bio);
-  background: var(--bio-bg);
-  box-shadow: 0 0 14px var(--bio-glow);
   text-shadow: 0 0 10px var(--bio-glow);
 }
 
 .tag-inline.interp {
   color: var(--interp);
-  background: var(--interp-bg);
-  box-shadow: 0 0 14px var(--interp-glow);
   text-shadow: 0 0 10px var(--interp-glow);
 }
 
@@ -325,27 +315,42 @@ h3 {
 }
 
 .tag-list li {
-  padding: 0.1rem 0.55rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  position: relative;
+  padding: 0 0 0 1rem;
+  border: 0;
+  border-radius: 0;
   color: var(--muted);
   font-size: 0.82rem;
 }
 
+.tag-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.68em;
+  width: 0.45rem;
+  height: 1px;
+  background: var(--line);
+}
+
 .tag-list li.bio {
-  border-color: var(--bio);
   color: var(--bio);
-  background: var(--bio-bg);
-  box-shadow: 0 0 16px var(--bio-glow);
   text-shadow: 0 0 10px var(--bio-glow);
 }
 
+.tag-list li.bio::before {
+  background: var(--bio);
+  box-shadow: 0 0 8px var(--bio-glow);
+}
+
 .tag-list li.interp {
-  border-color: var(--interp);
   color: var(--interp);
-  background: var(--interp-bg);
-  box-shadow: 0 0 16px var(--interp-glow);
   text-shadow: 0 0 10px var(--interp-glow);
+}
+
+.tag-list li.interp::before {
+  background: var(--interp);
+  box-shadow: 0 0 8px var(--interp-glow);
 }
 
 .simple-list {
