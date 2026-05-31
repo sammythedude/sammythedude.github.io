@@ -1,21 +1,24 @@
 :root {
   color-scheme: dark;
-  --bg: #1a1b1e;
-  --bg-soft: #242529;
-  --text: #e3e5ea;
-  --muted: #a4a9b4;
-  --faint: #6f747d;
-  --line: #34373d;
 
-  /* neutral structural accent (links, headings) */
-  --accent: #82cbb4;
-  --accent-soft: #a6ddca;
+  /* monochrome base — the ONLY non-theme colors on the site */
+  --bg: #15161a;
+  --bg-soft: #1e1f24;
+  --text: #d4d8df;     /* body copy */
+  --bright: #f3f5f8;   /* links, headings, emphasis */
+  --muted: #8b919c;
+  --faint: #5f646d;
+  --line: #2c2f36;
 
-  /* two research threads, opposed in temperature */
-  --interp: #93b4f5;          /* cool — interpretability & alignment */
-  --interp-bg: rgba(147, 180, 245, 0.10);
-  --bio: #e2a06a;             /* warm — applied ML / biomedical */
-  --bio-bg: rgba(226, 160, 106, 0.10);
+  /* the two research threads — the only chroma on the page */
+  --interp: #7eb0f2;                        /* cool — interpretability & alignment */
+  --interp-bg: rgba(126, 176, 242, 0.10);
+  --interp-glow: rgba(126, 176, 242, 0.55);
+  --bio: #e6a571;                           /* warm — applied ML / biomedical */
+  --bio-bg: rgba(230, 165, 113, 0.10);
+  --bio-glow: rgba(230, 165, 113, 0.55);
+
+  --dim: 0.32; /* opacity of the inactive thread when one is lit */
 }
 
 @font-face {
@@ -52,15 +55,19 @@ body {
   font-weight: 400;
 }
 
+/* Links are neutral and rely on brightness + underline, so the two theme
+   colors never have to compete with a third accent hue. */
 a {
-  color: var(--accent);
-  text-decoration: none;
+  color: var(--bright);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 160ms ease, color 160ms ease;
 }
 
 a:hover {
-  color: var(--accent-soft);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  color: var(--bright);
+  text-decoration-color: currentColor;
 }
 
 .page-shell {
@@ -86,20 +93,20 @@ a:hover {
   position: relative;
   display: inline-flex;
   align-items: center;
-  color: var(--text);
+  color: var(--bright);
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.2;
+  text-decoration: none;
 }
 
 .brand-link span {
-  color: var(--text);
+  color: var(--bright);
 }
 
-.brand-link span::selection,
-h1::selection {
-  background: var(--accent);
-  color: #111;
+::selection {
+  background: var(--interp);
+  color: #0b0c10;
 }
 
 .mark {
@@ -108,17 +115,12 @@ h1::selection {
   top: -18px;
   width: 48px;
   height: 80px;
-  filter: grayscale(1);
+  filter: grayscale(1) opacity(0.85);
+  transition: filter 200ms ease;
 }
 
 .brand-link:hover .mark {
-  filter: grayscale(0);
-}
-
-.site-title {
-  color: var(--text);
-  font-size: 0.95rem;
-  font-weight: 600;
+  filter: grayscale(0) opacity(1);
 }
 
 nav {
@@ -127,20 +129,21 @@ nav {
   gap: 0;
   color: var(--muted);
   font-size: 0.9rem;
-  margin-top: 4px;
+  margin-top: 6px;
   margin-left: -16px;
 }
 
 nav a {
-  color: var(--accent);
+  color: var(--muted);
   font-weight: 700;
   padding: 0 14px;
   border-left: 1px solid var(--line);
+  text-decoration: none;
 }
 
 nav a:hover,
 nav a[aria-current="page"] {
-  color: var(--accent-soft);
+  color: var(--bright);
 }
 
 main {
@@ -160,26 +163,23 @@ p {
 
 h1 {
   max-width: 100%;
-  color: var(--text);
-  font-size: 1.5rem;
+  color: var(--bright);
+  font-size: 1.55rem;
   line-height: 1.3;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0;
 }
 
-h1 {
-  color: var(--text);
-}
-
 h2 {
-  color: var(--accent);
-  font-size: 1.25rem;
+  color: var(--bright);
+  font-size: 1.2rem;
   line-height: 1.3;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 h2 a {
-  color: var(--accent);
+  color: var(--bright);
+  text-decoration: none;
 }
 
 h3 {
@@ -209,7 +209,7 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .link-row span {
@@ -218,8 +218,24 @@ h3 {
 
 .section {
   padding: 0;
-  margin-top: 42px;
+  margin-top: 48px;
   border-top: 0;
+}
+
+/* hairline section markers for quiet console structure */
+.section > h2 {
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.section > h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--line);
 }
 
 .section-head {
@@ -228,6 +244,14 @@ h3 {
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 24px;
+}
+
+.section-head h2 {
+  padding-bottom: 0;
+}
+
+.section-head h2::after {
+  display: none;
 }
 
 .section-head > a {
@@ -247,10 +271,6 @@ h3 {
   padding: 0;
 }
 
-.post-row + .post-row {
-  border-top: 0;
-}
-
 .post-row time {
   color: var(--faint);
   min-width: 12ch;
@@ -262,69 +282,26 @@ h3 {
   margin-top: 4px;
 }
 
-.tag-inline {
-  cursor: help;
-  font-weight: 700;
-  text-decoration: underline dotted;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  transition: color 160ms ease;
-}
-
-.tag-inline.bio {
-  color: var(--bio);
-  text-decoration-color: rgba(226, 160, 106, 0.5);
-}
-
-.tag-inline.interp {
-  color: var(--interp);
-  text-decoration-color: rgba(147, 180, 245, 0.5);
-}
-
-.tag-inline:hover {
-  text-decoration-style: solid;
-}
-
-.pill {
-  display: inline-block;
-  margin-left: 0.45ch;
-  padding: 0 0.5rem;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 400;
-  line-height: 1.55;
-  vertical-align: 0.08em;
-  opacity: 0.85;
-}
-
-.pill.bio {
-  color: var(--bio);
-  background: var(--bio-bg);
-}
-
-.pill.interp {
-  color: var(--interp);
-  background: var(--interp-bg);
-}
-
+/* ---- research threads (the page's identity) ---- */
 .threads {
   display: grid;
-  gap: 14px;
-  margin-top: 26px;
+  gap: 16px;
+  margin-top: 28px;
 }
 
 .thread {
   display: grid;
   gap: 3px;
-  padding-left: 14px;
+  padding-left: 16px;
   border-left: 2px solid var(--line);
+  transition: opacity 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .thread-name {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 700;
   letter-spacing: 0.01em;
+  transition: text-shadow 200ms ease;
 }
 
 .thread-detail {
@@ -348,6 +325,89 @@ h3 {
   color: var(--bio);
 }
 
+/* ---- inline thread tags ---- */
+.tag-inline {
+  cursor: help;
+  font-weight: 700;
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-shadow 200ms ease, opacity 200ms ease;
+}
+
+.tag-inline.bio {
+  color: var(--bio);
+  text-decoration-color: rgba(230, 165, 113, 0.5);
+}
+
+.tag-inline.interp {
+  color: var(--interp);
+  text-decoration-color: rgba(126, 176, 242, 0.5);
+}
+
+/* ---- pills ---- */
+.pill {
+  display: inline-block;
+  margin-left: 0.45ch;
+  padding: 0 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.55;
+  vertical-align: 0.08em;
+  transition: text-shadow 200ms ease, box-shadow 200ms ease, opacity 200ms ease;
+}
+
+.pill.bio {
+  color: var(--bio);
+  background: var(--bio-bg);
+}
+
+.pill.interp {
+  color: var(--interp);
+  background: var(--interp-bg);
+}
+
+/* ---- interactive cross-thread glow ----
+   Hovering anything in a thread lights up every element of that thread
+   across the page and dims the other thread. Calm by default, alive on hover. */
+.interp,
+.bio {
+  transition: opacity 200ms ease, text-shadow 200ms ease, box-shadow 200ms ease;
+}
+
+body.lit-interp .interp {
+  text-shadow: 0 0 14px var(--interp-glow);
+}
+
+body.lit-interp .pill.interp {
+  box-shadow: 0 0 16px var(--interp-glow);
+}
+
+body.lit-interp .thread.interp {
+  box-shadow: -2px 0 16px -4px var(--interp-glow);
+}
+
+body.lit-bio .bio {
+  text-shadow: 0 0 14px var(--bio-glow);
+}
+
+body.lit-bio .pill.bio {
+  box-shadow: 0 0 16px var(--bio-glow);
+}
+
+body.lit-bio .thread.bio {
+  box-shadow: -2px 0 16px -4px var(--bio-glow);
+}
+
+/* fade the inactive thread so the active one reads as a single story */
+body.lit-interp .bio,
+body.lit-bio .interp {
+  opacity: var(--dim);
+  text-shadow: none;
+}
+
 .simple-list {
   display: grid;
   gap: 8px;
@@ -359,7 +419,7 @@ h3 {
 
 .simple-list li::before {
   content: "— ";
-  color: var(--accent);
+  color: var(--faint);
 }
 
 .article-header {
@@ -385,6 +445,7 @@ h3 {
 .note-box {
   padding: 18px;
   border: 1px solid var(--line);
+  border-left: 2px solid var(--line);
   background: var(--bg-soft);
   color: var(--muted);
 }
