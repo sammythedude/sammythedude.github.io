@@ -10,141 +10,91 @@
   <body>
     <div class="page-shell">
       <header class="site-header">
-        <a class="brand" href="#top" aria-label="Samuel Dawit Assefa home">SDA</a>
+        <a class="site-title" href="/" aria-label="Samuel Dawit Assefa home">Samuel Dawit Assefa</a>
         <nav aria-label="Primary navigation">
-          <a href="#research">Research</a>
-          <a href="#experience">Work</a>
-          <a href="#projects">Projects</a>
-          <a href="assets/Samuel_Dawit_Assefa_CV.pdf">CV</a>
+          <a href="/#work">Work</a>
+          <a href="/#research">Research</a>
+          <a href="/blog/">Blog</a>
+          <a href="/assets/Samuel_Dawit_Assefa_CV.pdf">CV</a>
         </nav>
       </header>
 
-    <main id="top" class="site-main">
-      <section class="hero" aria-labelledby="intro-title">
-        <div class="hero-copy">
-          <h1 id="intro-title"><em>Samuel Dawit</em> Assefa.</h1>
-          <p class="lede">
-            I study how language models can become more reliable: through quantitative hallucination evaluation,
-            parameter-efficient alignment, calibrated uncertainty, and systems that pair small models with retrieval
-            and tools.
-          </p>
-          <div class="hero-actions">
-            <a class="button primary" href="assets/Samuel_Dawit_Assefa_CV.pdf">Download CV</a>
-            <a class="button secondary" href="mailto:samuelassefa@kaist.ac.kr">Email</a>
-          </div>
-          <div class="hero-meta">
-            <span>KAIST CS · Research Portfolio</span>
-            <span>01 / 04</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="focus-strip" aria-label="Research focus summary">
-        <p class="section-title">Current focus</p>
-        <ul class="tag-list">
-          <li>LLM evaluation</li>
-          <li>Hallucination metrics</li>
-          <li>RAG systems</li>
-          <li>Small-model augmentation</li>
-          <li>Biomedical vision</li>
-        </ul>
-      </section>
-
-      <section id="experience" class="section timeline-section">
-        <h2 class="section-title">Recent Work</h2>
-        <div class="list-stack">
-          <article class="list-item">
-            <time>Dec 2025-Feb 2026</time>
-            <div>
-              <h3>AI Engineer Intern · PuzzleAI</h3>
-              <p>Designed quantitative hallucination metrics for medical-domain LLMs and built an automated benchmarking pipeline combining LLM-as-judge and rule-based evaluation.</p>
-            </div>
-          </article>
-          <article class="list-item">
-            <time>Jul 2025-Present</time>
-            <div>
-              <h3>Researcher · BioMedical Optics Lab, KAIST</h3>
-              <p>Developed label-free computer vision pipelines on 3D holotomography imaging, including segmentation, engineered refractive-index features, and interpretable models for DNA fragmentation prediction.</p>
-            </div>
-          </article>
-          <article class="list-item">
-            <time>Winter 2024-Jul 2025</time>
-            <div>
-              <h3>Research Intern and System Designer · KIXLAB</h3>
-              <p>Designed retrieval-augmented generation systems for codebase understanding and studied how people reason about large software systems with LLM support.</p>
-            </div>
-          </article>
-          <article class="list-item">
-            <time>Fall 2025</time>
-            <div>
-              <h3>Individual Study Researcher · Brain and Machine Intelligence Lab</h3>
-              <p>Studied hierarchical LLM agent systems, execution failures in grounded agent architectures, and API-based tool-calling prototypes for controlled evaluation.</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section id="research" class="section">
-        <h2 class="section-title">Research</h2>
-        <div class="prose-block">
+      <main>
+        <section class="intro" aria-labelledby="intro-title">
+          <p class="kicker">KAIST CS · Daejeon</p>
+          <h1 id="intro-title">I work on reliable language-model systems and applied machine learning.</h1>
           <p>
-            I am interested in parameter-efficient LLM alignment, hallucination detection, quantitative evaluation,
-            uncertainty, calibration, and systems that make compact models more useful through retrieval, distillation,
-            and tool use.
+            I am interested in hallucination evaluation, parameter-efficient alignment, uncertainty and calibration,
+            retrieval-augmented systems, tool use, and biomedical computer vision.
           </p>
+          <div class="link-row">
+            <a href="mailto:samuelassefa@kaist.ac.kr">Email</a>
+            <a href="https://github.com/sammythedude">GitHub</a>
+            <a href="https://www.linkedin.com/in/samuelassefa">LinkedIn</a>
+          </div>
+        </section>
+
+        <section id="blog" class="section">
+          <div class="section-head">
+            <h2>Latest</h2>
+            <a href="/blog/">All posts</a>
+          </div>
+          <div class="post-list">
+            <article class="post-row">
+              <time datetime="2026-05-31">May 31, 2026</time>
+              <div>
+                <h3><a href="/blog/qwen-diaries-part-1.html">Qwen Diaries Part 1</a></h3>
+                <p>A scratchpad for experiments, notes, and observations around Qwen.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="work" class="section">
+          <h2>Work</h2>
+          <div class="post-list">
+            <article class="post-row">
+              <time>Dec 2025-Feb 2026</time>
+              <div>
+                <h3>AI Engineer Intern · PuzzleAI</h3>
+                <p>Built medical-domain LLM evaluation tooling, including hallucination metrics and automated benchmarking pipelines.</p>
+              </div>
+            </article>
+            <article class="post-row">
+              <time>Jul 2025-Present</time>
+              <div>
+                <h3>Researcher · BioMedical Optics Lab, KAIST</h3>
+                <p>Developing label-free computer vision pipelines on 3D holotomography imaging for single-cell analysis.</p>
+              </div>
+            </article>
+            <article class="post-row">
+              <time>Winter 2024-Jul 2025</time>
+              <div>
+                <h3>Research Intern and System Designer · KIXLAB</h3>
+                <p>Designed RAG systems for codebase understanding and studied human-LLM interaction in programming.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="research" class="section">
+          <h2>Research</h2>
           <p>
-            In applied vision, I work on label-free 3D holotomography pipelines for single-cell analysis, with an emphasis
-            on interpretable features and translational validation.
+            Current focus areas: LLM evaluation, hallucination detection, small-model augmentation, RAG systems,
+            tool-calling agents, and biomedical computer vision.
           </p>
-        </div>
-      </section>
+        </section>
 
-      <section id="projects" class="section projects-section">
-        <h2 class="section-title">Selected Projects</h2>
-        <div class="list-stack compact">
-          <article class="list-item">
-            <time>LLM</time>
-            <div>
-              <h3>Custom Language Model Training</h3>
-              <p>Curated an instruction-style dataset, fine-tuned a language model, and evaluated generation quality under limited data regimes.</p>
-            </div>
-          </article>
-          <article class="list-item">
-            <time>Vision</time>
-            <div>
-              <h3>StyleCLIP Latent Mapper</h3>
-              <p>Improved disentanglement by implementing deeper hierarchical latent mappers and training on self-managed GPU servers.</p>
-            </div>
-          </article>
-          <article class="list-item">
-            <time>MedML</time>
-            <div>
-              <h3>Vision Transformer on MedMNIST</h3>
-              <p>Implemented a hybrid convolution-ViT architecture for medical image classification with local and global context.</p>
-            </div>
-          </article>
-          <article class="list-item">
-            <time>Seg.</time>
-            <div>
-              <h3>FCN Segmentation on PASCAL VOC</h3>
-              <p>Built an FCN-based segmentation model reaching 89% pixel accuracy and 0.60 mean IoU.</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="section contact-section" aria-labelledby="contact-title">
-        <div>
-          <p class="section-title">Contact</p>
-          <h2 id="contact-title">Open to research conversations and collaborations.</h2>
-        </div>
-        <div class="contact-links">
-          <a href="mailto:samuelassefa@kaist.ac.kr">samuelassefa@kaist.ac.kr</a>
-          <a href="https://www.linkedin.com/in/samuelassefa">LinkedIn</a>
-          <a href="https://github.com/sammythedude">GitHub</a>
-        </div>
-      </section>
-    </main>
+        <section id="projects" class="section">
+          <h2>Projects</h2>
+          <ul class="simple-list">
+            <li>Custom language model training</li>
+            <li>StyleCLIP latent mapper</li>
+            <li>Vision Transformer on MedMNIST</li>
+            <li>FCN segmentation on PASCAL VOC</li>
+          </ul>
+        </section>
+      </main>
     </div>
   </body>
 </html>
