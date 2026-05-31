@@ -89,9 +89,9 @@ a:hover {
 }
 
 .page-shell {
-  width: min(100% - 40px, 908px);
+  width: min(100% - 40px, 1040px);
   margin: 0 auto;
-  padding-top: 64px;
+  padding-top: 40px;
   display: grid;
   grid-template-columns: 212px minmax(0, 1fr);
   gap: 64px;
@@ -132,7 +132,7 @@ a:hover {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  object-position: 38% 12%;
+  object-position: 38% 30%;
   border: 3px solid var(--bg);
 }
 
@@ -267,8 +267,8 @@ h3 {
 }
 
 .intro > p {
-  max-width: 680px;
-  margin-top: 16px;
+  max-width: 820px;
+  margin-top: 14px;
 }
 
 .intro > p:first-of-type {
@@ -277,7 +277,7 @@ h3 {
 
 .section {
   padding: 0;
-  margin-top: 48px;
+  margin-top: 36px;
   border-top: 0;
 }
 
@@ -343,7 +343,7 @@ h3 {
 
 /* ---- research threads (the page's identity) ---- */
 .threads-label {
-  margin-top: 28px;
+  margin-top: 20px;
   color: var(--faint);
   font-size: 0.74rem;
   font-weight: 700;
