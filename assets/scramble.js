@@ -35,3 +35,37 @@ document.querySelectorAll(".scramble").forEach((el) => {
   el.addEventListener("mouseenter", () => run(target, 8));
   el.addEventListener("mouseleave", () => run(original, 6));
 });
+
+// One-shot reveal for the Amharic greeting: Latin gibberish (rendered in a
+// mono fall-back font) resolves into the real title over ~1.6s. Unicode-safe
+// via Array.from, and spaces / "!" are preserved so the shape stays steady.
+// Without JS the heading just shows the Amharic — progressive enhancement.
+function gibberish(source) {
+  return Array.from(source)
+    .map((ch) =>
+      /\s/.test(ch) || ch === "!"
+        ? ch
+        : alphabet[Math.floor(Math.random() * alphabet.length)]
+    )
+    .join("");
+}
+
+const introTitle = document.querySelector(".intro-scramble");
+if (introTitle) {
+  const finalText = introTitle.textContent;
+  introTitle.classList.add("is-scrambling");
+  introTitle.textContent = gibberish(finalText);
+
+  let frame = 0;
+  const frames = 42; // ~1.6s at 38ms per frame
+  const introTimer = setInterval(() => {
+    frame += 1;
+    if (frame >= frames) {
+      introTitle.textContent = finalText;
+      introTitle.classList.remove("is-scrambling");
+      clearInterval(introTimer);
+      return;
+    }
+    introTitle.textContent = gibberish(finalText);
+  }, 38);
+}
