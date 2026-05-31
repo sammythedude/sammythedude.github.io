@@ -12,10 +12,10 @@
   --cactus: #cdffb8;
   --bio: #d08ab0;
   --bio-bg: rgba(208, 138, 176, 0.12);
-  --bio-glow: rgba(208, 138, 176, 0.34);
-  --interp: #93d4c1;
-  --interp-bg: rgba(147, 212, 193, 0.12);
-  --interp-glow: rgba(147, 212, 193, 0.32);
+  --bio-glow: rgba(208, 138, 176, 0.28);
+  --interp: #b8b3e9;
+  --interp-bg: rgba(184, 179, 233, 0.12);
+  --interp-glow: rgba(184, 179, 233, 0.28);
 }
 
 @font-face {
@@ -263,7 +263,9 @@ h3 {
 }
 
 .tag-inline {
+  cursor: help;
   font-weight: 700;
+  transition: color 160ms ease, text-shadow 160ms ease;
 }
 
 .tag-inline.bio {
@@ -304,19 +306,23 @@ h3 {
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px 14px;
   margin: 18px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .top-tags {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.12);
   margin-top: 24px;
 }
 
 .tag-list li {
-  position: relative;
-  padding: 0 0 0 1rem;
+  padding: 0;
   border: 0;
   border-radius: 0;
   color: var(--muted);
@@ -324,13 +330,9 @@ h3 {
 }
 
 .tag-list li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.68em;
-  width: 0.45rem;
-  height: 1px;
-  background: var(--line);
+  content: "#";
+  color: var(--line);
+  margin-right: 0.15rem;
 }
 
 .tag-list li.bio {
@@ -339,8 +341,7 @@ h3 {
 }
 
 .tag-list li.bio::before {
-  background: var(--bio);
-  box-shadow: 0 0 8px var(--bio-glow);
+  color: var(--bio);
 }
 
 .tag-list li.interp {
@@ -349,8 +350,7 @@ h3 {
 }
 
 .tag-list li.interp::before {
-  background: var(--interp);
-  box-shadow: 0 0 8px var(--interp-glow);
+  color: var(--interp);
 }
 
 .simple-list {
