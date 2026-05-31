@@ -1,21 +1,21 @@
 :root {
   color-scheme: dark;
-  --bg: #26272b;
-  --bg-soft: #303138;
-  --text: #dfe1e5;
-  --muted: #b9bec8;
-  --faint: #969ca8;
-  --line: #5d616b;
-  --accent: #7ee0bd;
-  --accent-soft: #d6f6a2;
-  --pink: #d482ab;
-  --cactus: #cdffb8;
-  --bio: #d08ab0;
-  --bio-bg: rgba(208, 138, 176, 0.12);
-  --bio-glow: rgba(208, 138, 176, 0.28);
-  --interp: #b8b3e9;
-  --interp-bg: rgba(184, 179, 233, 0.12);
-  --interp-glow: rgba(184, 179, 233, 0.28);
+  --bg: #1a1b1e;
+  --bg-soft: #242529;
+  --text: #e3e5ea;
+  --muted: #a4a9b4;
+  --faint: #6f747d;
+  --line: #34373d;
+
+  /* neutral structural accent (links, headings) */
+  --accent: #82cbb4;
+  --accent-soft: #a6ddca;
+
+  /* two research threads, opposed in temperature */
+  --interp: #93b4f5;          /* cool — interpretability & alignment */
+  --interp-bg: rgba(147, 180, 245, 0.10);
+  --bio: #e2a06a;             /* warm — applied ML / biomedical */
+  --bio-bg: rgba(226, 160, 106, 0.10);
 }
 
 @font-face {
@@ -98,7 +98,7 @@ a:hover {
 
 .brand-link span::selection,
 h1::selection {
-  background: var(--pink);
+  background: var(--accent);
   color: #111;
 }
 
@@ -140,7 +140,7 @@ nav a {
 
 nav a:hover,
 nav a[aria-current="page"] {
-  color: var(--cactus);
+  color: var(--accent-soft);
 }
 
 main {
@@ -168,7 +168,7 @@ h1 {
 }
 
 h1 {
-  color: var(--cactus);
+  color: var(--text);
 }
 
 h2 {
@@ -252,7 +252,7 @@ h3 {
 }
 
 .post-row time {
-  color: var(--pink);
+  color: var(--faint);
   min-width: 12ch;
   font-size: 0.9rem;
   font-weight: 600;
@@ -265,92 +265,87 @@ h3 {
 .tag-inline {
   cursor: help;
   font-weight: 700;
-  transition: color 160ms ease, text-shadow 160ms ease;
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 160ms ease;
 }
 
 .tag-inline.bio {
   color: var(--bio);
-  text-shadow: 0 0 10px var(--bio-glow);
+  text-decoration-color: rgba(226, 160, 106, 0.5);
 }
 
 .tag-inline.interp {
   color: var(--interp);
-  text-shadow: 0 0 10px var(--interp-glow);
+  text-decoration-color: rgba(147, 180, 245, 0.5);
+}
+
+.tag-inline:hover {
+  text-decoration-style: solid;
 }
 
 .pill {
   display: inline-block;
   margin-left: 0.45ch;
-  padding: 0 0.45rem;
+  padding: 0 0.5rem;
   border: 1px solid currentColor;
   border-radius: 999px;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 400;
   line-height: 1.55;
   vertical-align: 0.08em;
-  text-shadow: 0 0 10px currentColor;
+  opacity: 0.85;
 }
 
 .pill.bio {
   color: var(--bio);
   background: var(--bio-bg);
-  box-shadow: 0 0 14px var(--bio-glow);
 }
 
 .pill.interp {
   color: var(--interp);
   background: var(--interp-bg);
-  box-shadow: 0 0 14px var(--interp-glow);
 }
 
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  margin: 18px 0 0;
-  padding: 0;
-  list-style: none;
+.threads {
+  display: grid;
+  gap: 14px;
+  margin-top: 26px;
 }
 
-.top-tags {
-  padding: 0.75rem 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.8rem;
-  background: rgba(255, 255, 255, 0.03);
-  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.12);
-  margin-top: 24px;
+.thread {
+  display: grid;
+  gap: 3px;
+  padding-left: 14px;
+  border-left: 2px solid var(--line);
 }
 
-.tag-list li {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
+.thread-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.thread-detail {
   color: var(--muted);
   font-size: 0.82rem;
 }
 
-.tag-list li::before {
-  content: "#";
-  color: var(--line);
-  margin-right: 0.15rem;
+.thread.interp {
+  border-left-color: var(--interp);
 }
 
-.tag-list li.bio {
-  color: var(--bio);
-  text-shadow: 0 0 10px var(--bio-glow);
-}
-
-.tag-list li.bio::before {
-  color: var(--bio);
-}
-
-.tag-list li.interp {
+.thread.interp .thread-name {
   color: var(--interp);
-  text-shadow: 0 0 10px var(--interp-glow);
 }
 
-.tag-list li.interp::before {
-  color: var(--interp);
+.thread.bio {
+  border-left-color: var(--bio);
+}
+
+.thread.bio .thread-name {
+  color: var(--bio);
 }
 
 .simple-list {
