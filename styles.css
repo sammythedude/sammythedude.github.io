@@ -154,14 +154,11 @@ a:hover {
   font-size: 0.82rem;
 }
 
-/* KAIST tinted with the duo gradient so it echoes the avatar ring */
+/* KAIST in a solid warm accent so it clearly reads as colored */
 .brand-sub .kaist {
+  color: var(--bio);
   font-weight: 700;
-  color: var(--bio); /* fallback for browsers without background-clip: text */
-  background: linear-gradient(120deg, var(--interp), var(--bio));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.06em;
 }
 
 ::selection {
@@ -234,18 +231,13 @@ h1 {
   letter-spacing: 0;
 }
 
-/* Amharic greeting set in Adwa; smaller so the Ge'ez glyphs sit calmly.
-   While the scramble is running it shows Latin gibberish, so keep a mono
-   fallback in the stack for those frames. */
+/* Amharic greeting set in Adwa, kept small so the Ge'ez glyphs sit calmly.
+   The decode animation shuffles Ge'ez fidel in this same font. */
 .intro-title {
   font-family: "Adwa", "Roboto Mono", monospace;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   line-height: 1.4;
   min-height: 1.4em; /* reserve space so the scramble doesn't shift layout */
-}
-
-.intro-title.is-scrambling {
-  font-family: "Roboto Mono", ui-monospace, monospace;
 }
 
 h2 {
