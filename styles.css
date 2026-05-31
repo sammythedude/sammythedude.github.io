@@ -10,6 +10,12 @@
   --accent-soft: #d6f6a2;
   --pink: #d482ab;
   --cactus: #cdffb8;
+  --bio: #d08ab0;
+  --bio-bg: rgba(208, 138, 176, 0.12);
+  --bio-glow: rgba(208, 138, 176, 0.34);
+  --interp: #93d4c1;
+  --interp-bg: rgba(147, 212, 193, 0.12);
+  --interp-glow: rgba(147, 212, 193, 0.32);
 }
 
 @font-face {
@@ -254,6 +260,88 @@ h3 {
 
 .post-row p {
   margin-top: 4px;
+}
+
+.tag-inline {
+  display: inline-block;
+  padding: 0 0.32rem;
+  border: 1px solid currentColor;
+  border-radius: 0.35rem;
+  font-weight: 700;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.tag-inline.bio {
+  color: var(--bio);
+  background: var(--bio-bg);
+  box-shadow: 0 0 14px var(--bio-glow);
+  text-shadow: 0 0 10px var(--bio-glow);
+}
+
+.tag-inline.interp {
+  color: var(--interp);
+  background: var(--interp-bg);
+  box-shadow: 0 0 14px var(--interp-glow);
+  text-shadow: 0 0 10px var(--interp-glow);
+}
+
+.pill {
+  display: inline-block;
+  margin-left: 0.45ch;
+  padding: 0 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 400;
+  line-height: 1.55;
+  vertical-align: 0.08em;
+  text-shadow: 0 0 10px currentColor;
+}
+
+.pill.bio {
+  color: var(--bio);
+  background: var(--bio-bg);
+  box-shadow: 0 0 14px var(--bio-glow);
+}
+
+.pill.interp {
+  color: var(--interp);
+  background: var(--interp-bg);
+  box-shadow: 0 0 14px var(--interp-glow);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-list li {
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.tag-list li.bio {
+  border-color: var(--bio);
+  color: var(--bio);
+  background: var(--bio-bg);
+  box-shadow: 0 0 16px var(--bio-glow);
+  text-shadow: 0 0 10px var(--bio-glow);
+}
+
+.tag-list li.interp {
+  border-color: var(--interp);
+  color: var(--interp);
+  background: var(--interp-bg);
+  box-shadow: 0 0 16px var(--interp-glow);
+  text-shadow: 0 0 10px var(--interp-glow);
 }
 
 .simple-list {
