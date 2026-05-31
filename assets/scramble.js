@@ -13,9 +13,22 @@ function scrambleLike(source) {
   return out;
 }
 
+// Center a short reveal inside the original word's footprint, padding with
+// non-breaking spaces (which don't collapse and keep their width in a mono
+// font). Every animation frame is then the same character count as the word
+// it replaces, so the paragraph never reflows on hover.
+function centerPad(str, len) {
+  if (str.length >= len) return str;
+  const pad = len - str.length;
+  const left = Math.floor(pad / 2);
+  return " ".repeat(left) + str + " ".repeat(pad - left);
+}
+
 document.querySelectorAll(".scramble").forEach((el) => {
   const original = el.textContent;
-  const target = el.dataset.scramble || original;
+  const reveal = el.dataset.scramble
+    ? centerPad(el.dataset.scramble, original.length)
+    : original;
   let timer;
 
   function run(to, frames) {
@@ -32,7 +45,7 @@ document.querySelectorAll(".scramble").forEach((el) => {
     }, 34);
   }
 
-  el.addEventListener("mouseenter", () => run(target, 8));
+  el.addEventListener("mouseenter", () => run(reveal, 8));
   el.addEventListener("mouseleave", () => run(original, 6));
 });
 
