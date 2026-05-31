@@ -10,6 +10,22 @@
   --accent-soft: #d6f6a2;
 }
 
+@font-face {
+  font-family: "Roboto Mono";
+  src: url("/assets/fonts/roboto-mono-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roboto Mono";
+  src: url("/assets/fonts/roboto-mono-700.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -22,7 +38,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.75;
   font-weight: 400;
@@ -46,11 +62,39 @@ a:hover {
 }
 
 .site-header {
+  position: relative;
+  margin-bottom: 112px;
+  padding: 0;
+}
+
+.header-lockup {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 72px;
+}
+
+.brand-link {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 0 0 56px;
+  color: var(--text);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.mark {
+  position: absolute;
+  left: -72px;
+  top: -18px;
+  width: 48px;
+  height: 80px;
+  filter: grayscale(1);
+}
+
+.brand-link:hover .mark {
+  filter: grayscale(0);
 }
 
 .site-title {
@@ -62,19 +106,23 @@ a:hover {
 nav {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 14px;
+  gap: 0;
   color: var(--muted);
   font-size: 0.9rem;
+  margin-top: 4px;
+  margin-left: -16px;
 }
 
 nav a {
-  color: var(--muted);
+  color: var(--accent);
+  font-weight: 700;
+  padding: 0 14px;
+  border-left: 1px solid var(--line);
 }
 
 nav a:hover,
 nav a[aria-current="page"] {
-  color: var(--text);
+  color: var(--accent);
 }
 
 main {
@@ -124,6 +172,10 @@ h3 {
 
 .intro > p {
   max-width: 680px;
+  margin-top: 16px;
+}
+
+.intro > p:first-of-type {
   margin-top: 48px;
 }
 
@@ -228,11 +280,32 @@ h3 {
   }
 
   .site-header {
-    align-items: flex-start;
+    margin-bottom: 80px;
+  }
+
+  .header-lockup {
+    display: block;
+    padding-left: 42px;
+  }
+
+  .brand-link {
+    font-size: 1.25rem;
+  }
+
+  .mark {
+    left: -42px;
+    top: -12px;
+    width: 32px;
+    height: 56px;
   }
 
   nav {
-    gap: 10px 12px;
+    margin-top: 8px;
+    margin-left: -12px;
+  }
+
+  nav a {
+    padding: 0 12px;
   }
 
   main {
