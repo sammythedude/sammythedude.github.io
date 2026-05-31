@@ -89,7 +89,7 @@ a:hover {
 }
 
 .page-shell {
-  width: min(100% - 40px, 1040px);
+  width: min(100% - 40px, 1180px);
   margin: 0 auto;
   padding-top: 40px;
   display: grid;
@@ -267,7 +267,7 @@ h3 {
 }
 
 .intro > p {
-  max-width: 820px;
+  max-width: 900px;
   margin-top: 14px;
 }
 
