@@ -1,0 +1,42 @@
+/* Light, serif reading theme for the blog section only.
+   Overrides the dark site palette and switches reading copy to a clean serif.
+   The sidebar/nav keep the site's mono so navigation still feels like the site. */
+:root {
+  color-scheme: light;
+  --bg: #faf9f6;
+  --bg-soft: #f2efe8;
+  --text: #2c2a26;
+  --bright: #16130e;
+  --muted: #6b685f;
+  --faint: #9c9890;
+  --line: #e6e1d6;
+
+  --interp: #5e9b78;
+  --interp-bg: rgba(94, 155, 120, 0.10);
+  --interp-glow: rgba(94, 155, 120, 0.38);
+  --bio: #c5894c;
+  --bio-bg: rgba(197, 137, 76, 0.10);
+  --bio-glow: rgba(197, 137, 76, 0.38);
+}
+
+/* serif reading type for content; sidebar stays in the site mono */
+.article-header h1,
+.article-meta,
+.article-body,
+.intro h1,
+.intro > p,
+.post-row h3,
+.post-row p {
+  font-family: Georgia, Baskerville, "Hoefler Text", "Times New Roman", serif;
+}
+
+.article-body { font-size: 1.02rem; line-height: 1.74; }
+.article-header h1 { font-size: 2rem; line-height: 1.2; letter-spacing: -0.01em; }
+.intro h1 { letter-spacing: -0.01em; }
+.post-row h3 { font-size: 1.12rem; }
+
+/* links read as quiet underlines on the warm paper */
+.article-body a { color: var(--bright); text-decoration-color: rgba(0, 0, 0, 0.22); }
+.article-body a:hover { text-decoration-color: currentColor; }
+
+::selection { background: var(--interp); color: #fff; }

@@ -6,21 +6,22 @@
     <meta name="description" content="Qwen Diaries Part 1 — when does a small language model decide which source to answer from? A research diary on source-choice geometry by Samuel Dawit Assefa.">
     <title>Qwen Diaries Part 1 · Samuel Dawit Assefa</title>
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog/blog.css">
     <style>
       /* ---- scoped diary styles, themed to the site ---- */
       .article-body {
-        --d1:#4e79c7; --d2:#e0912f; --d3:#4f9d69; --d4:#d2564b; --d5:#8a6fc0;
-        --accent:#8fbf9f; --accent-soft:rgba(143,191,159,0.14);
-        --teal:#e6a571;
-        --ink:#f3f5f8; --ink-muted:#8b919c; --ink-faint:#5f646d;
-        --rule:#2c2f36; --paper:#15161a; --surface:#1e1f24;
+        --d1:#3f6ab8; --d2:#c97c1f; --d3:#3f8a57; --d4:#c2443a; --d5:#7458b0;
+        --accent:#5e9b78; --accent-soft:rgba(94,155,120,0.13);
+        --teal:#c5894c;
+        --ink:#16130e; --ink-muted:#6b685f; --ink-faint:#9c9890;
+        --rule:#e6e1d6; --paper:#ffffff; --surface:#f4f1ea;
         --mono:"Roboto Mono",ui-monospace,monospace;
-        --sans:"Roboto Mono",ui-monospace,monospace;
+        --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
       }
-      .article-body .lede { color:var(--ink); font-size:1.02rem; line-height:1.7; }
+      .article-body .lede { color:var(--ink); font-size:1.16rem; line-height:1.66; }
       .article-body h2 {
-        margin-top:18px; padding-top:30px; border-top:1px solid var(--line);
-        font-size:1.18rem;
+        margin-top:22px; padding-top:34px; border-top:1px solid var(--line);
+        font-size:1.4rem; font-weight:700; letter-spacing:-0.01em;
       }
       .article-body h2 .n { color:var(--accent); font-weight:700; margin-right:.5ch; }
       .article-body strong { color:var(--ink); font-weight:700; }
@@ -30,7 +31,7 @@
       }
 
       /* interactive diagrams just live in the flow — no card around them */
-      .viz { margin:8px 0; }
+      .viz { margin:10px auto; max-width:680px; }
       .viz-head { font-size:.92rem; font-weight:700; color:var(--ink); margin-bottom:2px; }
       .viz-sub { font-size:.8rem; color:var(--ink-muted); margin-bottom:12px; }
       .viz svg { display:block; width:100%; height:auto; }
@@ -49,14 +50,14 @@
       .viz .slabel { font-family:var(--mono); font-size:.78rem; color:var(--ink-muted); min-width:9.5em; }
 
       /* static matplotlib figures need a light backing to stay legible */
-      .fig { margin:8px 0; }
-      .fig-head { font-size:.92rem; font-weight:700; color:var(--ink); margin-bottom:10px; }
-      .fig .frame { background:#fbfbfb; border:1px solid var(--line); border-radius:4px; padding:10px; }
+      .fig { margin:10px auto; max-width:560px; }
+      .fig-head { font-size:.92rem; font-weight:700; color:var(--ink); margin-bottom:10px; font-family:var(--sans); }
+      .fig .frame { background:#ffffff; border:1px solid var(--line); border-radius:4px; padding:10px; }
       .fig img { display:block; width:100%; height:auto; border-radius:2px; }
       .fig figcaption { font-size:.79rem; color:var(--ink-muted); margin-top:11px; line-height:1.55; }
       .fig figcaption strong { color:var(--ink); }
 
-      .twocol { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+      .twocol { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:680px; margin:0 auto; }
       @media (max-width:680px){ .twocol { grid-template-columns:1fr; } }
 
       .result-box {
@@ -191,7 +192,7 @@
               <a href="https://arxiv.org/abs/2505.18235" target="_blank" rel="noopener">representation manifold</a>, and went looking for how a multi-way source choice is represented.
             </p>
 
-            <h2><span class="n">01</span> One vector is not a ruler</h2>
+            <h2><span class="n">01</span> Is it still just one direction?</h2>
 
             <p>
               In the two document case the choice was a single axis, so the obvious first try with three documents was to reuse that idea.
@@ -228,7 +229,7 @@
               <figcaption>Each grey line is one question. Forced Doc 1 answers sit low, Doc 3 answers sit high, and the Doc 2 answer lands in the middle almost every time. The red line is the mean.</figcaption>
             </figure>
 
-            <h2><span class="n">02</span> Not a vector, a subspace</h2>
+            <h2><span class="n">02</span> It needs more than one axis</h2>
 
             <p>
               If no single direction is universal, maybe the choice lives in a small subspace instead of on one line. The trick that
@@ -262,7 +263,7 @@
               </figure>
             </div>
 
-            <h2><span class="n">03</span> Five points, and a curve</h2>
+            <h2><span class="n">03</span> A line, a plane, or a curve?</h2>
 
             <p>
               With three points you can always draw a triangle, so of course it looks structured. The question that made this project
@@ -329,7 +330,7 @@
               more fragile to surface form.
             </p>
 
-            <h2><span class="n">05</span> Bigger models, honest mix</h2>
+            <h2><span class="n">05</span> Does it hold up in bigger models?</h2>
 
             <p>
               To check it was not a tiny model quirk I ran Gemma 3 1B and Gemma 3 4B. This is where the sunshine and rainbows of small
@@ -362,7 +363,7 @@
             </div>
             <p class="viz cap" style="margin-top:-2px;">Filled markers are forced centroids, crosses are natural generations colored by the document the model chose. The forced shape survives, the natural crosses wander.</p>
 
-            <h2><span class="n">06</span> But when is it deciding</h2>
+            <h2><span class="n">06</span> But when is it actually deciding?</h2>
 
             <p>
               Here is the question I should have asked first. All that clean geometry was measured <em>during</em> the answer tokens,
