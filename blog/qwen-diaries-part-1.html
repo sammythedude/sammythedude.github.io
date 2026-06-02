@@ -78,7 +78,8 @@
       @keyframes lrblink { 50% { opacity:0; } }
       .lr-ans { font-weight:700; }
       .lr-bars { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
-      .lr-row { display:grid; grid-template-columns:8.5em 1fr 3em; align-items:center; gap:.7rem; font-family:var(--sans); font-size:.8rem; }
+      .lr-row { display:grid; grid-template-columns:8.5em 1fr 3.6em; align-items:center; gap:.7rem; font-family:var(--sans); font-size:.8rem; }
+      .lr-val { font-family:var(--mono); }
       .lr-lab { color:var(--ink-muted); display:flex; align-items:center; gap:.45rem; white-space:nowrap; }
       .lr-row.lead .lr-lab { color:var(--ink); font-weight:700; }
       .lr-sw { width:9px; height:9px; border-radius:2px; flex:none; display:inline-block; }
@@ -545,7 +546,7 @@
 
             <figure class="viz" id="viz-lead">
               <div class="viz-head">Watch the lead change hands</div>
-              <div class="viz-sub">Drag through the model's own sentence as it is written. Each bar is how strongly it is leaning toward that document's answer at that word. The eventual answer is Doc 2, and the strip shows whether the residual stream can read the choice yet.</div>
+              <div class="viz-sub">Drag through the model's own sentence as it is written. The number on the right is the raw first-token log-probability, the logit-level score, the model gives each document's answer, and the bar shows it relative to the others at that moment. Closer to zero is more likely. The eventual answer is Doc 2, and the strip shows whether the residual stream can read the choice yet.</div>
               <div class="controls">
                 <span class="slabel" id="lr-pos">8 words before</span>
                 <input type="range" id="lr-range" min="0" max="5" step="1" value="0" />
@@ -759,7 +760,6 @@
             residEl=document.getElementById('lr-resid'), capEl=document.getElementById('lr-cap'),
             playBtn=document.getElementById('lr-play');
         var SEL=1; // Doc 2 is the answer it ends up giving
-        var ANS='TIMEFRAME(f(n))'; // Doc 2's answer string, the token it writes at the blank
         // the model's actual generated response, word by word
         var WORDS=('Based on the provided documents, the expression used to identify any given '
                   +'series of problems capable of being solved within time on a deterministic Turing machine is **').split(' ');
@@ -775,7 +775,7 @@
           {off:'1 word before', reveal:27, lp:[-16.98,-12.54,-16.61,-16.23,-20.70], resid:false,
            cap:'<strong>One word before.</strong> Doc 2 takes the lead back, but Doc 4 is right behind. Nearly a tie.'},
           {off:'the blank', reveal:28, lp:[-3.33,-0.59,-3.16,-1.14,-4.95], resid:true,
-           cap:'<strong>The blank.</strong> Doc 2 wins and the model writes TIMEFRAME(f(n)). Only now does the residual stream snap into Doc 2 region.'}
+           cap:'<strong>The blank.</strong> Doc 2 wins, its logit climbs to &minus;0.6 against Doc 4 at &minus;1.1, and the model commits. Only now does the residual stream snap into Doc 2 region.'}
         ];
         for(var i=0;i<5;i++){
           var row=document.createElement('div'); row.className='lr-row'; row.id='lr-row-'+i;
@@ -793,17 +793,15 @@
             html += (w < s.reveal) ? (raw+' ') : ('<span class="dim">'+raw+'</span> ');
             if(w === s.reveal-1){ html += '<span class="lr-caret"></span> '; }
           }
-          if(k===STEPS.length-1){ html += '<span class="lr-ans" style="color:'+DOC[SEL]+'">'+ANS+'</span>'; }
           streamEl.innerHTML=html;
           var mx=Math.max.apply(null,s.lp);
-          var ex=s.lp.map(function(v){ return Math.exp(v-mx); });
-          var sum=ex.reduce(function(a,b){ return a+b; },0);
+          var mn=Math.min.apply(null,s.lp);
           var leader=s.lp.indexOf(mx);
           s.lp.forEach(function(v,d){
             var row=document.getElementById('lr-row-'+d);
-            var share=ex[d]/sum*100;
-            row.querySelector('.lr-fill').style.width=Math.max(2,share).toFixed(1)+'%';
-            row.querySelector('.lr-val').textContent=(share>=1? Math.round(share)+'%' : '<1%');
+            var frac=(mx===mn)?1:(v-mn)/(mx-mn);
+            row.querySelector('.lr-fill').style.width=(8+92*frac).toFixed(1)+'%';
+            row.querySelector('.lr-val').textContent=v.toFixed(1);
             if(d===leader){ row.classList.add('lead'); } else { row.classList.remove('lead'); }
           });
           residEl.innerHTML = s.resid
