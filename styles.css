@@ -552,6 +552,81 @@ body.lit-bio .interp {
   color: var(--muted);
 }
 
+/* ---- featured / latest cards ---- */
+.featured {
+  display: grid;
+  gap: 14px;
+  margin-top: 2px;
+}
+
+.feature-card {
+  position: relative;
+  display: grid;
+  gap: 7px;
+  padding: 17px 20px;
+  background: var(--interp-bg);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--interp);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: box-shadow 220ms ease, border-color 200ms ease, transform 160ms ease;
+}
+
+/* the acceptance card glows on its own so it pops at rest */
+.feature-card.hero {
+  box-shadow: 0 0 22px -6px var(--interp-glow);
+}
+
+a.feature-card:hover,
+.feature-card.hero:hover {
+  border-color: var(--interp);
+  box-shadow: 0 0 26px -4px var(--interp-glow);
+  transform: translateY(-1px);
+}
+
+.feature-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feature-badge {
+  flex: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--interp);
+  background: var(--interp-bg);
+  border: 1px solid var(--interp);
+  border-radius: 999px;
+  padding: 1px 10px;
+  line-height: 1.7;
+}
+
+.feature-date {
+  color: var(--faint);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.feature-title {
+  color: var(--bright);
+  font-size: 1.06rem;
+  font-weight: 700;
+  line-height: 1.36;
+}
+
+.feature-card.hero .feature-title {
+  font-size: 1.16rem;
+}
+
+.feature-sub {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
 @media (max-width: 760px) {
   .page-shell {
     width: min(100% - 32px, 640px);
