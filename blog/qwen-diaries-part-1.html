@@ -70,6 +70,21 @@
       .refs-title { font-weight:700; color:var(--ink); margin-bottom:8px; }
       .refs ol { margin:0; padding-left:1.2rem; }
       .refs li { margin-bottom:7px; line-height:1.5; }
+
+      /* leaderboard race */
+      .lr-bars { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+      .lr-row { display:grid; grid-template-columns:8.5em 1fr 3em; align-items:center; gap:.7rem; font-family:var(--sans); font-size:.8rem; }
+      .lr-lab { color:var(--ink-muted); display:flex; align-items:center; gap:.45rem; white-space:nowrap; }
+      .lr-row.lead .lr-lab { color:var(--ink); font-weight:700; }
+      .lr-sw { width:9px; height:9px; border-radius:2px; flex:none; display:inline-block; }
+      .lr-tag { font-size:.56rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:.06em .42em; border-radius:3px; background:var(--accent-soft); color:var(--accent); }
+      .lr-track { background:var(--surface); border:1px solid var(--rule); border-radius:5px; height:16px; overflow:hidden; }
+      .lr-fill { display:block; height:100%; opacity:.5; border-radius:4px; transition:width .4s ease, opacity .4s ease; }
+      .lr-row.lead .lr-fill { opacity:1; }
+      .lr-val { text-align:right; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
+      .lr-row.lead .lr-val { color:var(--ink); }
+      .lr-resid { margin-top:14px; font-family:var(--sans); font-size:.8rem; color:var(--ink-muted); display:flex; align-items:center; gap:.5rem; }
+      .lr-chip { display:inline-block; padding:.12em .55em; border-radius:4px; font-weight:600; border:1px solid var(--rule); }
     </style>
   </head>
   <body>
@@ -474,13 +489,13 @@
             </p>
 
             <p>
-              I also wanted to see it on one real run rather than as an average. Qwen 0.8B is answering a question where five documents each
-              give a different answer. This tracks how far ahead the answer it finally gives is over its strongest rival, in log odds,
-              across the last few words before it commits.
+              I also wanted to follow one real run instead of an average. Here Qwen 0.8B answers a question where five documents each give a
+              different answer. As it writes its sentence, I keep checking one thing at every word. Is the answer it eventually gives currently
+              beating its strongest competitor, or losing to it? The chart below plots exactly that, the gap between the two.
             </p>
 
             <figure class="viz" id="viz-margin">
-              <div class="viz-head">One real run, the logit competition over time</div>
+              <div class="viz-head">Who is ahead, word by word</div>
               <div class="viz-sub">Above the line, the answer it lands on is winning. Below the line, a rival is winning.</div>
               <svg viewBox="0 0 720 300" role="img" aria-label="Line chart of the log-odds margin between the eventual answer and its strongest rival across the last tokens before emission.">
                 <!-- y guide labels -->
@@ -519,8 +534,28 @@
             </figure>
 
             <p>
+              The line tells you the gap, but not who is actually in front. So here is the same run again as a race between all five documents.
+              Drag through it and watch the lead change hands, from the eventual answer, to a rival, and back at the very end.
+            </p>
+
+            <figure class="viz" id="viz-lead">
+              <div class="viz-head">Watch the lead change hands</div>
+              <div class="viz-sub">Each bar is how strongly the model is leaning toward that document's answer right then. The eventual answer is Doc 2. The strip below shows whether the residual stream can read the choice yet.</div>
+              <div class="controls">
+                <span class="slabel" id="lr-pos">8 words before</span>
+                <input type="range" id="lr-range" min="0" max="5" step="1" value="0" />
+                <button class="btn" id="lr-play">Play</button>
+              </div>
+              <div class="lr-bars" id="lr-bars"></div>
+              <div class="lr-resid" id="lr-resid"></div>
+              <div class="cap" id="lr-cap"></div>
+            </figure>
+
+            <p>
               That single run is not a special case. Averaged over all the questions, the eventual answer only becomes easy to read in the
-              logits in the last token or two before it is emitted. Very similar to the residual readout.
+              logits in the last token or two. The residual side, which I have cached for every position, tells the same story from the other
+              direction. The choice is unreadable through the whole prompt, sitting at chance, and only snaps to readable once the answer
+              tokens start, climbing to near perfect within the first four. The two clocks line up almost exactly.
             </p>
 
             <figure class="fig">
@@ -535,7 +570,7 @@
               <figcaption>The margin of the eventual winner over its closest rival stays negative for most of the run and only crosses zero around one token before emission. A late collapse, not an early plan.</figcaption>
             </figure>
 
-            <h2><span class="n">07</span> Where this leaves me</h2>
+            <h2><span class="n">07</span> What do I think?</h2>
 
             <p>
               In the end I am not sure I have found the answer to when a language model decides on an answer it is going to pick. It could
@@ -546,13 +581,12 @@
 
             <p>
               If we take that seriously, then source choice is not one universal vector. It is a low dimensional, curved manifold that you can
-              read off the activations, but only once the model starts answering. That lines up uncomfortably well with the geometric reading
-              of interpretability, where the right object is a curved surface of states and a probe is just one chord across it.
+              read off the activations, but only once the model starts answering.
             </p>
 
             <p>
               What I find genuinely interesting is that geometry like this usually shows up for concepts or ideas. Here it shows up for source
-              selection, a computational choice the model makes when it compares documents for an answer. <strong>That is the part I want to emphasise.</strong>
+              selection, a computational choice the model makes when it compares documents for an answer. <strong>I think this is the most important finding here, that the representation of choice itself has geometry.</strong>
             </p>
 
             <div class="refs">
@@ -707,6 +741,66 @@
             v++; if(v>6){ clearInterval(timer); timer=null; playBtn.textContent='Play'; return; }
             range.value=v; render(v);
           }, 950);
+        });
+        render(0);
+      })();
+
+      /* ---- leaderboard: one run, who is in front ---- */
+      (function(){
+        var range=document.getElementById('lr-range'); if(!range) return;
+        var pos=document.getElementById('lr-pos'), barsEl=document.getElementById('lr-bars'),
+            residEl=document.getElementById('lr-resid'), capEl=document.getElementById('lr-cap'),
+            playBtn=document.getElementById('lr-play');
+        var SEL=1; // Doc 2 is the answer it ends up giving
+        var STEPS=[
+          {off:'8 words before', lp:[-25.50,-20.75,-30.71,-25.64,-30.81], resid:false,
+           cap:'<strong>Eight words before the blank.</strong> Doc 2, the answer it ends up giving, is briefly in front, but it is far from the blank, so treat this as noise.'},
+          {off:'5 words before', lp:[-26.90,-31.68,-35.10,-24.17,-29.52], resid:false,
+           cap:'<strong>Five words before.</strong> The lead jumps to Doc 4, a rival. In the middle of its own sentence the model is leaning the wrong way.'},
+          {off:'3 words before', lp:[-28.20,-31.69,-33.98,-25.81,-30.00], resid:false,
+           cap:'<strong>Three words before.</strong> Still Doc 4 in front. Stop it here and you would bet on the wrong document.'},
+          {off:'2 words before', lp:[-22.80,-25.11,-25.87,-20.49,-27.42], resid:false,
+           cap:'<strong>Two words before.</strong> Doc 4 holds the lead while the model runs up to the blank.'},
+          {off:'1 word before', lp:[-16.98,-12.54,-16.61,-16.23,-20.70], resid:false,
+           cap:'<strong>One word before.</strong> Doc 2 takes the lead back, but Doc 4 is right behind. Nearly a tie.'},
+          {off:'the blank', lp:[-3.33,-0.59,-3.16,-1.14,-4.95], resid:true,
+           cap:'<strong>The blank.</strong> Doc 2 wins and the model writes its answer. Only now does the residual stream snap into Doc 2 region.'}
+        ];
+        for(var i=0;i<5;i++){
+          var row=document.createElement('div'); row.className='lr-row'; row.id='lr-row-'+i;
+          row.innerHTML='<span class="lr-lab"><span class="lr-sw" style="background:'+DOC[i]+'"></span>Doc '+(i+1)+(i===SEL?' <span class="lr-tag">answer</span>':'')+'</span>'+
+            '<span class="lr-track"><span class="lr-fill" style="background:'+DOC[i]+';width:0%"></span></span>'+
+            '<span class="lr-val"></span>';
+          barsEl.appendChild(row);
+        }
+        function render(k){
+          var s=STEPS[k]; pos.textContent=s.off;
+          var mx=Math.max.apply(null,s.lp);
+          var ex=s.lp.map(function(v){ return Math.exp(v-mx); });
+          var sum=ex.reduce(function(a,b){ return a+b; },0);
+          var leader=s.lp.indexOf(mx);
+          s.lp.forEach(function(v,d){
+            var row=document.getElementById('lr-row-'+d);
+            var share=ex[d]/sum*100;
+            row.querySelector('.lr-fill').style.width=Math.max(2,share).toFixed(1)+'%';
+            row.querySelector('.lr-val').textContent=(share>=1? Math.round(share)+'%' : '<1%');
+            if(d===leader){ row.classList.add('lead'); } else { row.classList.remove('lead'); }
+          });
+          residEl.innerHTML = s.resid
+            ? 'Residual readout <span class="lr-chip" style="background:var(--accent-soft);color:var(--accent);border-color:var(--accent)">locked into Doc 2</span>'
+            : 'Residual readout <span class="lr-chip">undecided, at chance</span>';
+          capEl.innerHTML=s.cap;
+        }
+        range.addEventListener('input', function(){ render(+range.value); });
+        var timer=null;
+        playBtn.addEventListener('click', function(){
+          if(timer){ clearInterval(timer); timer=null; playBtn.textContent='Play'; return; }
+          playBtn.textContent='Pause';
+          var v=0; range.value=0; render(0);
+          timer=setInterval(function(){
+            v++; if(v>5){ clearInterval(timer); timer=null; playBtn.textContent='Play'; return; }
+            range.value=v; render(v);
+          }, 1000);
         });
         render(0);
       })();
