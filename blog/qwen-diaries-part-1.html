@@ -3,9 +3,73 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Qwen Diaries Part 1 by Samuel Dawit Assefa.">
+    <meta name="description" content="Qwen Diaries Part 1 — when does a small language model decide which source to answer from? A research diary on source-choice geometry by Samuel Dawit Assefa.">
     <title>Qwen Diaries Part 1 · Samuel Dawit Assefa</title>
     <link rel="stylesheet" href="/styles.css">
+    <style>
+      /* ---- scoped diary styles, themed to the site ---- */
+      .article-body {
+        --d1:#4e79c7; --d2:#e0912f; --d3:#4f9d69; --d4:#d2564b; --d5:#8a6fc0;
+        --accent:#8fbf9f; --accent-soft:rgba(143,191,159,0.14);
+        --teal:#e6a571;
+        --ink:#f3f5f8; --ink-muted:#8b919c; --ink-faint:#5f646d;
+        --rule:#2c2f36; --paper:#15161a; --surface:#1e1f24;
+        --mono:"Roboto Mono",ui-monospace,monospace;
+        --sans:"Roboto Mono",ui-monospace,monospace;
+      }
+      .article-body .lede { color:var(--ink); font-size:1.02rem; line-height:1.7; }
+      .article-body h2 {
+        margin-top:18px; padding-top:30px; border-top:1px solid var(--line);
+        font-size:1.18rem;
+      }
+      .article-body h2 .n { color:var(--accent); font-weight:700; margin-right:.5ch; }
+      .article-body strong { color:var(--ink); font-weight:700; }
+      .article-body code {
+        font-family:var(--mono); font-size:.86em; color:var(--accent);
+        background:var(--bg-soft); border:1px solid var(--line); border-radius:3px; padding:.04em .35em;
+      }
+
+      /* interactive diagrams just live in the flow — no card around them */
+      .viz { margin:8px 0; }
+      .viz-head { font-size:.92rem; font-weight:700; color:var(--ink); margin-bottom:2px; }
+      .viz-sub { font-size:.8rem; color:var(--ink-muted); margin-bottom:12px; }
+      .viz svg { display:block; width:100%; height:auto; }
+      .viz .cap { font-size:.79rem; color:var(--ink-muted); margin-top:11px; line-height:1.55; }
+      .viz .cap strong { color:var(--ink); }
+
+      .viz .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:8px 0 14px; }
+      .viz .btn {
+        font-family:var(--mono); font-size:.78rem; background:transparent; color:var(--ink-muted);
+        border:1px solid var(--line); border-radius:3px; padding:5px 11px; cursor:pointer;
+        transition:color .14s, border-color .14s, background .14s;
+      }
+      .viz .btn:hover { color:var(--ink); border-color:var(--ink-faint); }
+      .viz .btn.active { color:var(--accent); border-color:var(--accent); background:var(--accent-soft); }
+      .viz input[type=range] { flex:1; min-width:150px; accent-color:var(--accent); }
+      .viz .slabel { font-family:var(--mono); font-size:.78rem; color:var(--ink-muted); min-width:9.5em; }
+
+      /* static matplotlib figures need a light backing to stay legible */
+      .fig { margin:8px 0; }
+      .fig-head { font-size:.92rem; font-weight:700; color:var(--ink); margin-bottom:10px; }
+      .fig .frame { background:#fbfbfb; border:1px solid var(--line); border-radius:4px; padding:10px; }
+      .fig img { display:block; width:100%; height:auto; border-radius:2px; }
+      .fig figcaption { font-size:.79rem; color:var(--ink-muted); margin-top:11px; line-height:1.55; }
+      .fig figcaption strong { color:var(--ink); }
+
+      .twocol { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+      @media (max-width:680px){ .twocol { grid-template-columns:1fr; } }
+
+      .result-box {
+        border-left:2px solid var(--accent); background:var(--accent-soft);
+        padding:12px 16px; color:var(--ink); font-size:.9rem; line-height:1.6;
+      }
+      .result-box b { color:var(--accent); }
+
+      .refs { margin-top:6px; padding-top:18px; border-top:1px solid var(--line); font-size:.8rem; color:var(--ink-muted); }
+      .refs-title { font-weight:700; color:var(--ink); margin-bottom:8px; }
+      .refs ol { margin:0; padding-left:1.2rem; }
+      .refs li { margin-bottom:7px; line-height:1.5; }
+    </style>
   </head>
   <body>
     <div class="page-shell">
@@ -37,21 +101,615 @@
           <header class="article-header">
             <a href="/blog/">← Blog</a>
             <h1>Qwen Diaries Part 1</h1>
-            <p class="article-meta">May 31, 2026 · Draft · <span class="tag-inline interp">interpretability</span></p>
+            <p class="article-meta">May 31, 2026 · <span class="tag-inline interp">interpretability</span> · When does a small model choose its source?</p>
           </header>
 
           <div class="article-body">
+
+            <p class="note-box" style="border-left-color:var(--interp);">
+              This is a spinoff from my workshop paper <a href="/assets/qwen-diaries-part-1/hidden-commitment.pdf">Hidden Commitment</a>,
+              my first ever piece of work and my firstborn. If you want the primary results that these experiments build on,
+              I really recommend reading that one first.
+            </p>
+
             <p class="note-box">
-              Placeholder for the material you are going to upload. This post is ready for notes, experiment logs,
-              screenshots, links, or write-up text.
+              A note on why I work in a small model. Larger models, I learned the hard way, are really hard to read.
+              They often develop specializations, since more dimensions let them cram more features into superposition,
+              and longer chains of attention heads and MLPs let them compose more complex functions
+              (see Anthropic's <a href="https://transformer-circuits.pub/2021/framework/index.html" target="_blank" rel="noopener">A Mathematical Framework for Transformer Circuits</a>).
+              So a single task may not be cleanly causally linked to one simple direction or subspace. In my previous paper,
+              during the answer span the model basically represented the whole decision with a single direction, a strong readout
+              that also flipped which source it answered from when I steered along it.
             </p>
+
+            <p class="lede">
+              This blog is mostly about my journey trying to figure out when a small language model decides between choices,
+              during its own token by token generation. I am not sure I have actually found the answer. I tried to come at it
+              from a couple of different directions, the logit competition and the residual readout, and to see whether the two agree.
+            </p>
+
             <p>
-              Working notes will go here.
+              The setup is simple. One question, several documents that quietly disagree, each one supporting a different answer.
+              The model reads all of them and commits to one. I want to know what that commitment looks like on the inside.
             </p>
+
+            <!-- conflict setup -->
+            <figure class="viz" id="viz-setup">
+              <div class="viz-head">The conflict setup</div>
+              <div class="viz-sub">A FaithEval style prompt. One question, several documents, each supporting a different answer.</div>
+              <svg viewBox="0 0 900 320" role="img" aria-label="A question feeding three conflicting documents into a model that picks one answer">
+                <rect x="20" y="135" width="150" height="50" rx="4" fill="var(--surface)" stroke="var(--rule)"/>
+                <text x="95" y="158" text-anchor="middle" font-family="var(--sans)" font-size="13" fill="var(--ink)">Question</text>
+                <text x="95" y="175" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-muted)">how often cleaned?</text>
+                <g font-family="var(--sans)" font-size="12">
+                  <rect x="260" y="40" width="180" height="58" rx="4" fill="var(--surface)" stroke="var(--d1)" stroke-width="1.5"/>
+                  <text x="275" y="63" fill="var(--d1)" font-weight="700">Doc 1</text>
+                  <text x="275" y="83" fill="var(--ink-muted)" font-family="var(--mono)" font-size="11">"once a week"</text>
+                  <rect x="260" y="131" width="180" height="58" rx="4" fill="var(--surface)" stroke="var(--d2)" stroke-width="1.5"/>
+                  <text x="275" y="154" fill="var(--d2)" font-weight="700">Doc 2</text>
+                  <text x="275" y="174" fill="var(--ink-muted)" font-family="var(--mono)" font-size="11">"once a month"</text>
+                  <rect x="260" y="222" width="180" height="58" rx="4" fill="var(--surface)" stroke="var(--d3)" stroke-width="1.5"/>
+                  <text x="275" y="245" fill="var(--d3)" font-weight="700">Doc 3</text>
+                  <text x="275" y="265" fill="var(--ink-muted)" font-family="var(--mono)" font-size="11">"twice a year"</text>
+                </g>
+                <path d="M170 160 C 210 160, 215 69, 258 69" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <path d="M170 160 L 258 160" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <path d="M170 160 C 210 160, 215 251, 258 251" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <path d="M440 69 C 520 69, 540 160, 600 160" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <path d="M440 160 L 600 160" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <path d="M440 251 C 520 251, 540 160, 600 160" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <rect x="600" y="120" width="120" height="80" rx="4" fill="var(--surface)" stroke="var(--ink-muted)" stroke-width="1.5"/>
+                <text x="660" y="155" text-anchor="middle" font-family="var(--sans)" font-size="13" font-weight="700" fill="var(--ink)">model</text>
+                <text x="660" y="174" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-muted)">reads all 3</text>
+                <path d="M720 160 L 800 160" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+                <defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--accent)"/></marker></defs>
+                <rect x="800" y="131" width="80" height="58" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="840" y="156" text-anchor="middle" font-family="var(--sans)" font-size="12" font-weight="700" fill="var(--accent)">picks</text>
+                <text x="840" y="174" text-anchor="middle" font-family="var(--sans)" font-size="12" fill="var(--accent)">one</text>
+              </svg>
+              <div class="cap"><strong>The setup.</strong> I ran this with three documents, then five. For every candidate answer I could either force the model to say it, or let it answer freely and see where it went.</div>
+            </figure>
+
+            <p>
+              In my original paper this choice, for two documents, was a single direction with a very strong readout.
+              In Qwen 0.8B, when two documents disagree, which source the answer actually uses is captured by one residual
+              direction whose sign tells you the chosen document. Sparse middle layer MLP writers feed that same coordinate,
+              and when you steer the coordinate the model flips which source it answers from. So the whole decision lived on
+              one signed axis you could both read off the activations and push on.
+            </p>
+
+            <figure class="fig">
+              <div class="fig-head">The original result, in two documents</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/hidden_commitment_task.png" alt="Hidden Commitment task and states. Two documents give Ireland independence as 1922 and 1985. A learned source-selection direction added to the layer 13 residual stream flips the answer from Document 2 to Document 1."></div>
+              <figcaption><strong>From Hidden Commitment.</strong> Two documents fill the same slot with incompatible answers. Adding a learned source direction at the layer 13 residual stream on the decision token flips the model from one document's answer to the other's. One direction, read and steered. Full results in the <a href="/assets/qwen-diaries-part-1/hidden-commitment.pdf">paper</a>.</figcaption>
+            </figure>
+
+            <p>
+              But I had a question. What happens when there is more than one feature, more than two choices? I took inspiration from
+              Goodfire's <a href="https://www.lesswrong.com/posts/87iDbBM3Qaf4q4gN4/the-future-of-interpretability-is-geometric" target="_blank" rel="noopener">geometric interpretability</a>
+              work, the argument that a clean linear feature is usually just a slice through a curved
+              <a href="https://arxiv.org/abs/2505.18235" target="_blank" rel="noopener">representation manifold</a>, and went looking for how a multi-way source choice is represented.
+            </p>
+
+            <h2><span class="n">01</span> One vector is not a ruler</h2>
+
+            <p>
+              In the two document case the choice was a single axis, so the obvious first try with three documents was to reuse that idea.
+              I learned an axis between Doc 1 and Doc 2 and asked where Doc 3 lands on it. That did not separate the answers well.
+              When I instead learned the axis from the two far apart endpoints, Doc 1 and Doc 3, and dropped the middle document onto it,
+              the three answers ordered themselves cleanly. That small asymmetry was the first real hint. If a single straight axis
+              were enough, it would not matter which pair you learned it from. The endpoint axis working while the adjacent pair failed
+              told me the representation was not one line. It had some geometry to it.
+            </p>
+
+            <figure class="viz" id="viz-axis">
+              <div class="viz-head">Adjacent pair axis vs endpoint axis</div>
+              <div class="viz-sub">Where each document's forced residual lands when projected onto the chosen direction.</div>
+              <div class="controls">
+                <button class="btn" data-axis="binary">Adjacent pair (Doc1&ndash;Doc2)</button>
+                <button class="btn active" data-axis="endpoint">Endpoints (Doc1&ndash;Doc3)</button>
+              </div>
+              <svg viewBox="0 0 740 150" id="axis-svg">
+                <line x1="60" y1="95" x2="680" y2="95" stroke="var(--rule)" stroke-width="2"/>
+                <g id="axis-ticks"></g>
+                <g id="axis-dots"></g>
+              </svg>
+              <div class="cap" id="axis-cap"></div>
+            </figure>
+
+            <p>
+              That endpoint axis is not just a toy. I learned it only from the Doc 1 and Doc 3 forced residuals, then dropped the
+              unseen Doc 2 onto it. Doc 2 landed in between the two ends in <b>94.7%</b> of examples. A real ordering, not a relabeled binary split.
+            </p>
+
+            <figure class="fig">
+              <div class="fig-head">Doc 2 falls between the endpoints</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/endpoint_continuum.png" alt="Teacher forced Doc1, Doc2, Doc3 answers projected onto the Doc3 minus Doc1 endpoint axis, with Doc2 sitting in the middle."></div>
+              <figcaption>Each grey line is one question. Forced Doc 1 answers sit low, Doc 3 answers sit high, and the Doc 2 answer lands in the middle almost every time. The red line is the mean.</figcaption>
+            </figure>
+
+            <h2><span class="n">02</span> Not a vector, a subspace</h2>
+
+            <p>
+              If no single direction is universal, maybe the choice lives in a small subspace instead of on one line. The trick that
+              made it show up was within question centering, subtracting each question's own mean so the analysis stops rediscovering
+              which question you are on. After that, the three sources fall into clean islands.
+            </p>
+
+            <div class="twocol">
+              <figure class="viz">
+                <div class="viz-head" style="font-size:.82rem;">The idea</div>
+                <svg viewBox="0 0 360 240" aria-label="A single direction versus a two dimensional subspace with three clusters">
+                  <text x="90" y="24" text-anchor="middle" font-family="var(--sans)" font-size="12" fill="var(--ink-muted)">one direction</text>
+                  <line x1="30" y1="120" x2="150" y2="120" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#a2)"/>
+                  <defs><marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-faint)"/></marker></defs>
+                  <circle cx="55" cy="120" r="6" fill="var(--d1)"/>
+                  <circle cx="100" cy="120" r="6" fill="var(--d2)"/>
+                  <circle cx="120" cy="120" r="6" fill="var(--d3)"/>
+                  <text x="90" y="165" text-anchor="middle" font-family="var(--sans)" font-size="10" fill="var(--ink-faint)">Doc2, Doc3 collide</text>
+                  <text x="270" y="24" text-anchor="middle" font-family="var(--sans)" font-size="12" fill="var(--ink)">a subspace</text>
+                  <line x1="210" y1="200" x2="210" y2="50" stroke="var(--rule)"/><line x1="210" y1="200" x2="350" y2="200" stroke="var(--rule)"/>
+                  <circle cx="250" cy="80" r="6" fill="var(--d1)"/><circle cx="262" cy="92" r="6" fill="var(--d1)"/><circle cx="240" cy="95" r="6" fill="var(--d1)"/>
+                  <circle cx="320" cy="120" r="6" fill="var(--d2)"/><circle cx="332" cy="132" r="6" fill="var(--d2)"/><circle cx="318" cy="138" r="6" fill="var(--d2)"/>
+                  <circle cx="255" cy="165" r="6" fill="var(--d3)"/><circle cx="270" cy="175" r="6" fill="var(--d3)"/><circle cx="248" cy="178" r="6" fill="var(--d3)"/>
+                </svg>
+                <div class="cap">A probe is one chord. The choice itself needs two axes.</div>
+              </figure>
+              <figure class="fig">
+                <div class="fig-head" style="font-size:.82rem;">The real data</div>
+                <div class="frame"><img src="/assets/qwen-diaries-part-1/within_qid_centered_pca_choice_subspace.png" alt="Three document residual choice subspace, the real PCA"></div>
+                <figcaption>PC1 alone reads the choice <strong>89.5%</strong> of the time. PC1 plus PC2 hits <strong>100%</strong>.</figcaption>
+              </figure>
+            </div>
+
+            <h2><span class="n">03</span> Five points, and a curve</h2>
+
+            <p>
+              With three points you can always draw a triangle, so of course it looks structured. The question that made this project
+              better was, what about five. Is it a line, a flat patch, or something curved. I fit line, plane and 3D structure to the
+              five forced centroids. A line barely explained a third of it. You needed three dimensions before it fit.
+            </p>
+
+            <figure class="viz" id="viz-fit">
+              <div class="viz-head">How well does each shape fit the five centroids?</div>
+              <div class="viz-sub">Qwen-0.8B, five document forced choice. R2 is variance of the centroids explained.</div>
+              <div class="controls">
+                <button class="btn" data-fit="line">Line</button>
+                <button class="btn" data-fit="plane">Plane</button>
+                <button class="btn active" data-fit="curve">3D curve</button>
+                <span style="flex:1"></span>
+                <span class="slabel" id="fit-r2" style="min-width:5em;">R2 0.914</span>
+              </div>
+              <svg viewBox="0 0 740 260" id="fit-svg">
+                <g id="fit-line"></g>
+                <g id="fit-points"></g>
+              </svg>
+              <div class="cap" id="fit-cap"><strong>Not a straight line.</strong> The five source choices sit on a curved, low dimensional manifold. The helix idea is fun but five points is not enough to prove it.</div>
+            </figure>
+
+            <p>
+              Here are those five forced centroids in the first three principal components. This is the plot that made me stop trusting
+              the flat version. In two dimensions Doc 4 and Doc 5 were almost on top of each other, a centroid distance of just <b>0.168</b>.
+              The third axis pulls them apart to <b>0.468</b>. The structure was always there, the 2D picture just hid it.
+            </p>
+
+            <figure class="fig">
+              <div class="fig-head">The five forced centroids in 3D</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/forced_choice_pca_3d.png" alt="5 document forced choice PCA in three dimensions, the five centroids connected by a path that bends through PC1, PC2 and PC3."></div>
+              <figcaption>Each big marker is one document's forced centroid, faint points are individual examples. The path connecting them bends rather than running straight, which is the curved manifold showing up directly.</figcaption>
+            </figure>
+
+            <h2><span class="n">04</span> Does free choice land in the same place?</h2>
+
+            <p>
+              Everything above was teacher forced, where I forced the model to say each answer, a map of where each answer would put
+              the model. The real test is whether the model walks into those same regions on its own. The distribution a model generates
+              from can differ from the teacher forced one (see Jack Lindsey's
+              <a href="https://transformer-circuits.pub/2025/attribution-graphs/biology.html" target="_blank" rel="noopener">work on the biology of a language model</a>).
+              For little Qwen 0.8B it did anyway, almost every time.
+            </p>
+
+            <div class="result-box">Of 38 classifiable natural answers, <b>92.1%</b> landed nearest to the forced centroid of the document they actually chose. The map drawn by forcing is the same territory the model wanders into freely.</div>
+
+            <figure class="fig">
+              <div class="fig-head">Free generations overlaid on the forced map</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/natural_overlay_color_by_selected_doc.png" alt="Natural answers overlaid on forced centroids, colored by selected document."></div>
+              <figcaption>Solid markers are forced centroids, hollow markers are free generations. They cluster around the centroid of whichever source they chose.</figcaption>
+            </figure>
+
+            <figure class="fig">
+              <div class="fig-head">The same overlay in 3D</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/natural_overlay_forced_pca_3d.png" alt="Natural free generations overlaid on the five forced centroids in three principal components."></div>
+              <figcaption>The free answers, faint points, settle into the same five regions the forced centroids mark out. Forcing draws the map and the model walks into it on its own.</figcaption>
+            </figure>
+
+            <p>
+              It mostly survives paraphrase too. I intuitively thought it might be an artifact of token similarity, but it holds for
+              reworded answers, <b>84.2%</b> still land in the right region, even though the fine grained position along the axis is much
+              more fragile to surface form.
+            </p>
+
+            <h2><span class="n">05</span> Bigger models, honest mix</h2>
+
+            <p>
+              To check it was not a tiny model quirk I ran Gemma 3 1B and Gemma 3 4B. This is where the sunshine and rainbows of small
+              model readouts ended and it started getting more complicated. The forced geometry held in place, but the free generation
+              readout did not transfer at the same layer and position. To be fair there were also fewer points to characterise the clusters.
+              And oddly the cluster was actually more cleanly geometric in the larger model, which might itself be a model quirk. To really
+              know if it holds I would need a lot more VRAM and a larger Qwen model to test whether the same geometry survives at scale.
+            </p>
+
+            <figure class="fig">
+              <div class="fig-head">Forced geometry travels, natural readout does not</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/qwen08_vs_gemma1b_vs_gemma4b_geometry_comparison.png" alt="Geometry metrics across Qwen-0.8B, Gemma-3-1B, Gemma-3-4B."></div>
+              <figcaption>Bigger Gemma models fit the low dimensional forced shape as well or better than Qwen, but the <strong>natural match</strong> rate falls off as they grow. The geometry exists, the readout location is model dependent.</figcaption>
+            </figure>
+
+            <p>
+              You can see the mismatch directly. In both Gemma sizes the big filled forced centroids string out into the same kind of
+              low dimensional shape. But the natural answers, the little crosses, do not snap to their matching centroid the way Qwen's did.
+            </p>
+
+            <div class="twocol">
+              <figure class="fig">
+                <div class="fig-head" style="font-size:.82rem;">Gemma-3-1B</div>
+                <div class="frame"><img src="/assets/qwen-diaries-part-1/gemma3_1b_forced_natural_3d_color.png" alt="Gemma-3-1B forced centroids and natural answers in 3D."></div>
+              </figure>
+              <figure class="fig">
+                <div class="fig-head" style="font-size:.82rem;">Gemma-3-4B</div>
+                <div class="frame"><img src="/assets/qwen-diaries-part-1/gemma3_4b_forced_natural_3d_color.png" alt="Gemma-3-4B forced centroids and natural answers in 3D."></div>
+              </figure>
+            </div>
+            <p class="viz cap" style="margin-top:-2px;">Filled markers are forced centroids, crosses are natural generations colored by the document the model chose. The forced shape survives, the natural crosses wander.</p>
+
+            <h2><span class="n">06</span> But when is it deciding</h2>
+
+            <p>
+              Here is the question I should have asked first. All that clean geometry was measured <em>during</em> the answer tokens,
+              the <code>mean_decision</code> readout. Is the choice already sitting in the residual stream at the last prompt token,
+              the <code>pre_response_last</code> position, before the model says anything? Here is where those positions live in a single answer.
+            </p>
+
+            <figure class="viz" id="viz-timing">
+              <div class="viz-head">Where the readout positions sit in one answer</div>
+              <div class="viz-sub">The prompt ends, the model emits answer tokens, and the choice readout is the mean over the answer span.</div>
+              <svg viewBox="0 0 960 220" role="img" aria-label="Token timeline showing pre_response_last before the answer, response_first, and the decision span read out as mean_decision">
+                <line x1="40" y1="150" x2="900" y2="150" stroke="var(--rule)" stroke-width="1"/>
+                <rect x="40" y="92" width="96" height="34" rx="3" fill="var(--surface)" stroke="var(--rule)"/>
+                <text x="88" y="114" text-anchor="middle" font-family="var(--sans)" font-size="12" fill="var(--ink-muted)">prompt &hellip;</text>
+                <rect x="146" y="92" width="74" height="34" rx="3" fill="none" stroke="var(--teal)" stroke-width="1.25" stroke-dasharray="5 4"/>
+                <text x="183" y="114" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--teal)">tail</text>
+                <line x1="220" y1="84" x2="220" y2="130" stroke="var(--ink-faint)" stroke-width="1.1" stroke-dasharray="3 3"/>
+                <line x1="246" y1="84" x2="246" y2="130" stroke="var(--ink-faint)" stroke-width="1.1" stroke-dasharray="3 3"/>
+                <text x="214" y="70" text-anchor="end" font-family="var(--sans)" font-size="12" fill="var(--teal)">pre_response_last</text>
+                <text x="252" y="70" text-anchor="start" font-family="var(--sans)" font-size="12" fill="var(--ink-muted)">response_first</text>
+                <g font-family="var(--mono)" font-size="13">
+                  <rect x="246" y="92" width="58" height="34" rx="3" fill="var(--surface)" stroke="var(--rule)"/><text x="275" y="114" text-anchor="middle" fill="var(--ink)">Once</text>
+                  <rect x="308" y="92" width="40" height="34" rx="3" fill="var(--surface)" stroke="var(--rule)"/><text x="328" y="114" text-anchor="middle" fill="var(--ink)">a</text>
+                  <text x="368" y="114" text-anchor="middle" font-size="16" fill="var(--ink-faint)">&hellip;</text>
+                  <rect x="392" y="92" width="58" height="34" rx="3" fill="var(--surface)" stroke="var(--rule)"/><text x="421" y="114" text-anchor="middle" fill="var(--ink)">it</text>
+                  <rect x="454" y="92" width="46" height="34" rx="3" fill="var(--surface)" stroke="var(--rule)"/><text x="477" y="114" text-anchor="middle" fill="var(--ink)">is</text>
+                  <rect x="504" y="86" width="58" height="46" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/><text x="533" y="114" text-anchor="middle" fill="var(--accent)" font-weight="700">once</text>
+                  <rect x="566" y="86" width="48" height="46" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/><text x="590" y="114" text-anchor="middle" fill="var(--accent)" font-weight="700">a</text>
+                  <rect x="618" y="86" width="74" height="46" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/><text x="655" y="114" text-anchor="middle" fill="var(--accent)" font-weight="700">month</text>
+                  <rect x="696" y="92" width="40" height="34" rx="3" fill="var(--surface)" stroke="var(--rule)"/><text x="716" y="114" text-anchor="middle" fill="var(--ink)">.</text>
+                </g>
+                <path d="M504,150 L504,162 L692,162 L692,150" fill="none" stroke="var(--accent)" stroke-width="1.35"/>
+                <line x1="598" y1="162" x2="598" y2="174" stroke="var(--accent)" stroke-width="1.35"/>
+                <text x="598" y="192" text-anchor="middle" font-family="var(--sans)" font-size="12.5" fill="var(--accent)">decision span, read out as mean_decision</text>
+                <path d="M146,150 L146,162 L220,162 L220,150" fill="none" stroke="var(--teal)" stroke-width="1.35"/>
+                <line x1="183" y1="162" x2="183" y2="174" stroke="var(--teal)" stroke-width="1.35"/>
+                <text x="183" y="192" text-anchor="middle" font-family="var(--sans)" font-size="12.5" fill="var(--teal)">prompt tail</text>
+                <line x1="533" y1="60" x2="533" y2="86" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/>
+                <text x="533" y="48" text-anchor="middle" font-family="var(--sans)" font-size="11.5" fill="var(--accent)">first_decision</text>
+                <line x1="655" y1="60" x2="655" y2="86" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/>
+                <text x="655" y="48" text-anchor="middle" font-family="var(--sans)" font-size="11.5" fill="var(--accent)">last_decision</text>
+              </svg>
+              <div class="cap"><strong>The question is timing.</strong> All the clean geometry above was the green span, during the answer. The amber <code>pre_response_last</code> token is the last moment before the model commits to anything.</div>
+            </figure>
+
+            <p>
+              I read the choice out with a leave one question out SVM at each of those positions. The answer was nothing, then everything.
+              I also thought maybe a stronger non linear separator could pick up a readout earlier, but the SVM only performed strongly at
+              the decision token, the same as my linear probe. Neel Nanda was right, simple is usually good.
+            </p>
+
+            <figure class="fig">
+              <div class="fig-head">When does the residual stream reveal the choice?</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/svm_detection_accuracy_by_position.png" alt="SVM readout accuracy of document choice across positions."></div>
+              <figcaption>Chance is 20% for five candidates. Before the answer starts the readout is at chance. At the very first answer token it jumps to 80%, and within four tokens it is perfect.</figcaption>
+            </figure>
+
+            <figure class="fig">
+              <div class="fig-head">The same readout, swept across every layer</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/svm_detection_accuracy_layer_heatmap.png" alt="Heatmap of leave one question out SVM accuracy across layers and readout positions."></div>
+              <figcaption>Rows are readout positions, columns are layers. The bright block is the first few answer tokens through the middle layers. The whole pre-answer row stays dark at chance, no matter which layer you pick.</figcaption>
+            </figure>
+
+            <p>
+              So there is no clean decision sitting in the activations before the model speaks. I wanted another way to tell where the
+              model was computing or preparing the answer token. I intuitively thought the logit distribution during generation would tell
+              me something about the answer, that the closer we get to the answer token the more the model would push up the logit of the
+              answer it is about to pick. But the logits and the residual readouts turned out to look very similar.
+            </p>
+
+            <figure class="viz" id="viz-timeline">
+              <div class="viz-head">The decision, scrubbed token by token</div>
+              <div class="viz-sub">Drag from eight tokens before the answer to just after it. The logit race is on the left, the residual readout on the right.</div>
+              <div class="controls">
+                <span class="slabel" id="tl-pos">offset &minus;8</span>
+                <input type="range" id="tl-range" min="0" max="6" step="1" value="0" />
+                <button class="btn" id="tl-play">Play</button>
+              </div>
+              <div class="twocol">
+                <div>
+                  <div style="font-family:var(--sans); font-size:.78rem; font-weight:700; color:var(--ink); margin-bottom:6px;">Logits &middot; what it is about to say</div>
+                  <svg viewBox="0 0 360 180" id="tl-logit">
+                    <text x="20" y="20" font-family="var(--sans)" font-size="10" fill="var(--d4)">runner-up</text>
+                    <text x="340" y="20" text-anchor="end" font-family="var(--sans)" font-size="10" fill="var(--d3)">selected</text>
+                    <line x1="30" y1="70" x2="330" y2="70" stroke="var(--rule)" stroke-width="6" stroke-linecap="round"/>
+                    <line x1="180" y1="52" x2="180" y2="88" stroke="var(--ink-faint)" stroke-dasharray="3 3"/>
+                    <circle id="tl-knob" cx="60" cy="70" r="11" fill="var(--d4)" stroke="var(--paper)" stroke-width="2"/>
+                    <text id="tl-win" x="180" y="125" text-anchor="middle" font-family="var(--mono)" font-size="13" fill="var(--ink)">17% ahead</text>
+                    <text id="tl-margin" x="180" y="148" text-anchor="middle" font-family="var(--sans)" font-size="10" fill="var(--ink-muted)">median margin &minus;2.64</text>
+                    <text id="tl-rank" x="180" y="166" text-anchor="middle" font-family="var(--sans)" font-size="10" fill="var(--ink-muted)">vocab rank ~32900</text>
+                  </svg>
+                </div>
+                <div>
+                  <div style="font-family:var(--sans); font-size:.78rem; font-weight:700; color:var(--ink); margin-bottom:6px;">Residual stream &middot; where it actually is</div>
+                  <svg viewBox="0 0 360 180" id="tl-resid">
+                    <g id="tl-dots"></g>
+                    <text id="tl-acc" x="180" y="168" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--ink-muted)">readout 20% (chance)</text>
+                  </svg>
+                </div>
+              </div>
+              <div class="cap" id="tl-cap"><strong>Eight tokens out.</strong> The eventual answer is buried in the logits and the residual stream cannot tell the five choices apart at all.</div>
+            </figure>
+
+            <p>
+              That is the whole story in one widget. Before generation the residual state is undecided and the logits hold a soft, wobbling
+              preference. The eventual answer does not even reliably beat its single strongest rival until a token before it is emitted.
+              Then the answer token enters the context and the hidden state snaps into a source specific region.
+            </p>
+
+            <p>
+              I also wanted to see it on one real run rather than as an average. Qwen 0.8B is answering a question where five documents each
+              give a different answer. This tracks how far ahead the answer it finally gives is over its strongest rival, in log odds,
+              across the last few words before it commits.
+            </p>
+
+            <figure class="viz" id="viz-margin">
+              <div class="viz-head">One real run, the logit competition over time</div>
+              <div class="viz-sub">Above the line, the answer it lands on is winning. Below the line, a rival is winning.</div>
+              <svg viewBox="0 0 720 300" role="img" aria-label="Line chart of the log-odds margin between the eventual answer and its strongest rival across the last tokens before emission.">
+                <!-- y guide labels -->
+                <text x="48" y="62" text-anchor="end" font-family="var(--mono)" font-size="10" fill="var(--ink-faint)">+5</text>
+                <text x="48" y="134" text-anchor="end" font-family="var(--mono)" font-size="10" fill="var(--ink-muted)">0</text>
+                <text x="48" y="246" text-anchor="end" font-family="var(--mono)" font-size="10" fill="var(--ink-faint)">&minus;8</text>
+                <text x="20" y="100" font-family="var(--sans)" font-size="10" fill="var(--accent)" transform="rotate(-90 20 100)">answer ahead</text>
+                <text x="20" y="232" font-family="var(--sans)" font-size="10" fill="var(--d4)" transform="rotate(-90 20 232)">rival ahead</text>
+                <!-- zero baseline -->
+                <line x1="64" y1="130" x2="700" y2="130" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="4 4"/>
+                <!-- the trajectory -->
+                <polyline points="80,58.8 200,242.7 320,218.2 440,199.3 560,74.7 680,121.8" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+                <!-- markers, colored by sign -->
+                <circle cx="80"  cy="58.8"  r="5.5" fill="var(--accent)" stroke="var(--paper)" stroke-width="1.5"/>
+                <circle cx="200" cy="242.7" r="5.5" fill="var(--d4)" stroke="var(--paper)" stroke-width="1.5"/>
+                <circle cx="320" cy="218.2" r="5.5" fill="var(--d4)" stroke="var(--paper)" stroke-width="1.5"/>
+                <circle cx="440" cy="199.3" r="5.5" fill="var(--d4)" stroke="var(--paper)" stroke-width="1.5"/>
+                <circle cx="560" cy="74.7"  r="5.5" fill="var(--accent)" stroke="var(--paper)" stroke-width="1.5"/>
+                <circle cx="680" cy="121.8" r="5.5" fill="var(--accent)" stroke="var(--paper)" stroke-width="1.5"/>
+                <!-- x labels -->
+                <g font-family="var(--mono)" font-size="10" fill="var(--ink-muted)" text-anchor="middle">
+                  <text x="80"  y="278">8</text>
+                  <text x="200" y="278">5</text>
+                  <text x="320" y="278">3</text>
+                  <text x="440" y="278">2</text>
+                  <text x="560" y="278">1</text>
+                  <text x="680" y="278">0</text>
+                </g>
+                <text x="382" y="296" text-anchor="middle" font-family="var(--sans)" font-size="10.5" fill="var(--ink-faint)">words before the answer</text>
+                <!-- light annotations -->
+                <text x="80" y="44" text-anchor="middle" font-family="var(--sans)" font-size="10" fill="var(--ink-muted)">leads by luck</text>
+                <text x="320" y="236" text-anchor="middle" font-family="var(--sans)" font-size="10" fill="var(--ink-muted)">a rival is ahead</text>
+                <text x="660" y="108" text-anchor="end" font-family="var(--sans)" font-size="10" fill="var(--ink-muted)">settles, just ahead</text>
+              </svg>
+              <div class="cap"><strong>A late crossover.</strong> The answer it ends up giving leads early by accident, falls behind a rival through the middle of the sentence, and only climbs back above the line in the last word or two. The decision is made at the last moment, not planned up front.</div>
+            </figure>
+
+            <p>
+              That single run is not a special case. Averaged over all the questions, the eventual answer only becomes easy to read in the
+              logits in the last token or two before it is emitted. Very similar to the residual readout.
+            </p>
+
+            <figure class="fig">
+              <div class="fig-head">The answer becomes logit visible just before emission</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/predecision_logit_trajectory.png" alt="Across questions, the selected answer top-1 rate rises and its median vocab rank collapses in the last two tokens before the answer."></div>
+              <figcaption>Blue is how often the eventual answer is already the top candidate, red is its typical rank in the full vocabulary. Both stay flat and far off until the last couple of tokens, then snap toward the answer.</figcaption>
+            </figure>
+
+            <figure class="fig">
+              <div class="fig-head">The aggregate logit race, selected vs strongest rival</div>
+              <div class="frame"><img src="/assets/qwen-diaries-part-1/selected_vs_runnerup_trajectory.png" alt="Pairwise logit margin between selected answer and strongest competitor across offsets."></div>
+              <figcaption>The margin of the eventual winner over its closest rival stays negative for most of the run and only crosses zero around one token before emission. A late collapse, not an early plan.</figcaption>
+            </figure>
+
+            <h2><span class="n">07</span> Where this leaves me</h2>
+
+            <p>
+              In the end I am not sure I have found the answer to when a language model decides on an answer it is going to pick. It could
+              be a weakness of my methodology. But the findings could also tell us that the machinery, in a small model at least, runs a
+              series of computations and only spits out the decision around the answer tokens. In my case the model really is thinking out loud.
+              There could be a confounding variable in parametric knowledge, but regardless, the geometry of the choice surface holds.
+            </p>
+
+            <p>
+              If we take that seriously, then source choice is not one universal vector. It is a low dimensional, curved manifold that you can
+              read off the activations, but only once the model starts answering. That lines up uncomfortably well with the geometric reading
+              of interpretability, where the right object is a curved surface of states and a probe is just one chord across it.
+            </p>
+
+            <p>
+              What I find genuinely interesting is that geometry like this usually shows up for concepts or ideas. Here it shows up for source
+              selection, a computational choice the model makes when it compares documents for an answer. <strong>That is the part I want to emphasise.</strong>
+            </p>
+
+            <div class="refs">
+              <div class="refs-title">References and notes</div>
+              <ol>
+                <li>S. D. Assefa, <em><a href="/assets/qwen-diaries-part-1/hidden-commitment.pdf">Hidden Commitment</a></em>, the workshop paper this diary spins off from. Residual source-choice direction, sparse MLP writers, and source steering in Qwen 0.8B.</li>
+                <li>Goodfire, <em><a href="https://arxiv.org/abs/2505.18235" target="_blank" rel="noopener">The Origins of Representation Manifolds in Large Language Models</a></em>. Linear features as slices through curved manifolds.</li>
+                <li>Goodfire, <em><a href="https://www.lesswrong.com/posts/87iDbBM3Qaf4q4gN4/the-future-of-interpretability-is-geometric" target="_blank" rel="noopener">The Future of Interpretability is Geometric</a></em>. Circular and curved concept manifolds.</li>
+                <li>Elhage et al., <em><a href="https://transformer-circuits.pub/2021/framework/index.html" target="_blank" rel="noopener">A Mathematical Framework for Transformer Circuits</a></em>. Superposition and function composition over attention and MLP chains.</li>
+                <li>Lindsey et al., <em><a href="https://transformer-circuits.pub/2025/attribution-graphs/biology.html" target="_blank" rel="noopener">On the Biology of a Large Language Model</a></em>, on how generation can differ from forced behavior.</li>
+                <li>All numbers here are small sample. The five point helix diagnostics use only five centroids, and the larger model natural readout was measured at the Qwen tuned layer and position and has not been swept.</li>
+              </ol>
+            </div>
+
           </div>
         </article>
       </main>
     </div>
+
     <script src="/assets/theme.js"></script>
+    <script>
+    (function(){
+      var DOC = ['var(--d1)','var(--d2)','var(--d3)','var(--d4)','var(--d5)'];
+
+      /* ---- axis: adjacent pair vs endpoint ---- */
+      (function(){
+        var svg = document.getElementById('axis-svg'); if(!svg) return;
+        var dotsG = document.getElementById('axis-dots');
+        var ticksG = document.createElementNS('http://www.w3.org/2000/svg','g');
+        svg.insertBefore(ticksG, dotsG);
+        var cap = document.getElementById('axis-cap');
+        var X0=60, X1=680, Y=95, lo=-0.4, hi=0.45;
+        function px(v){ return X0 + (v-lo)/(hi-lo)*(X1-X0); }
+        [-0.4,-0.2,0,0.2,0.4].forEach(function(v){
+          var x=px(v);
+          ticksG.innerHTML += '<line x1="'+x+'" y1="90" x2="'+x+'" y2="100" stroke="var(--rule)"/>'+
+            '<text x="'+x+'" y="120" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-faint)">'+v+'</text>';
+        });
+        var data = {
+          endpoint: { v:[-0.176,0.077,0.362], labels:['Doc1','Doc2','Doc3'],
+            cap:'<strong>Ordered.</strong> Learn the axis from the Doc 1 and Doc 3 endpoints and Doc 2 sits in the middle 94.7% of the time. Spearman 0.93.' },
+          binary: { v:[-0.30,0.30,0.345], labels:['Doc1','Doc2','Doc3'],
+            cap:'<strong>Jumbled.</strong> The adjacent Doc 1 to Doc 2 axis splits Doc 1 off, then cannot order Doc 2 against Doc 3. One contrast, not a ruler.' }
+        };
+        function draw(mode){
+          var d=data[mode]; dotsG.innerHTML='';
+          d.v.forEach(function(val,i){
+            var x=px(val);
+            dotsG.innerHTML += '<circle cx="'+x+'" cy="'+Y+'" r="10" fill="'+DOC[i]+'" stroke="var(--paper)" stroke-width="2" style="transition:all .5s"/>'+
+              '<text x="'+x+'" y="65" text-anchor="middle" font-family="var(--sans)" font-size="12" font-weight="700" fill="'+DOC[i]+'">'+d.labels[i]+'</text>';
+          });
+          cap.innerHTML=d.cap;
+        }
+        svg.parentNode.querySelectorAll('[data-axis]').forEach(function(b){
+          b.addEventListener('click', function(){
+            svg.parentNode.querySelectorAll('[data-axis]').forEach(function(x){x.classList.remove('active');});
+            b.classList.add('active'); draw(b.dataset.axis);
+          });
+        });
+        draw('endpoint');
+      })();
+
+      /* ---- fit: line / plane / curve ---- */
+      (function(){
+        var svg=document.getElementById('fit-svg'); if(!svg) return;
+        var ptsG=document.getElementById('fit-points'), lineG=document.getElementById('fit-line');
+        var r2lbl=document.getElementById('fit-r2');
+        var P=[[120,180],[250,120],[380,150],[510,90],[640,140]];
+        function drawPts(){
+          ptsG.innerHTML='';
+          P.forEach(function(p,i){
+            ptsG.innerHTML += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="9" fill="'+DOC[i]+'" stroke="var(--paper)" stroke-width="2"/>'+
+              '<text x="'+p[0]+'" y="'+(p[1]-16)+'" text-anchor="middle" font-family="var(--sans)" font-size="11" fill="'+DOC[i]+'">D'+(i+1)+'</text>';
+          });
+        }
+        var fits = {
+          line:  { r2:'0.383', d:'M120 178 L640 116', err:true },
+          plane: { r2:'0.675', d:'M120 180 Q 380 100 640 140', err:true },
+          curve: { r2:'0.914', d:'M120 180 C 200 120 250 120 380 150 C 470 170 510 90 640 140', err:false }
+        };
+        function approx(x){ return 178 + (x-120)/(640-120)*(116-178); }
+        function draw(mode){
+          var f=fits[mode];
+          lineG.innerHTML='<path d="'+f.d+'" fill="none" stroke="var(--accent)" stroke-width="2.5" opacity="0.95"/>';
+          if(f.err){ P.forEach(function(p){ lineG.innerHTML += '<line x1="'+p[0]+'" y1="'+p[1]+'" x2="'+p[0]+'" y2="'+approx(p[0])+'" stroke="var(--ink-faint)" stroke-dasharray="2 3"/>'; }); }
+          r2lbl.textContent='R2 '+f.r2; drawPts();
+        }
+        svg.parentNode.querySelectorAll('[data-fit]').forEach(function(b){
+          b.addEventListener('click', function(){
+            svg.parentNode.querySelectorAll('[data-fit]').forEach(function(x){x.classList.remove('active');});
+            b.classList.add('active'); draw(b.dataset.fit);
+          });
+        });
+        draw('curve');
+      })();
+
+      /* ---- scrubber ---- */
+      (function(){
+        var range=document.getElementById('tl-range'); if(!range) return;
+        var posL=document.getElementById('tl-pos'), knob=document.getElementById('tl-knob');
+        var winT=document.getElementById('tl-win'), marT=document.getElementById('tl-margin'), rankT=document.getElementById('tl-rank');
+        var accT=document.getElementById('tl-acc'), cap=document.getElementById('tl-cap');
+        var dotsG=document.getElementById('tl-dots'), playBtn=document.getElementById('tl-play');
+        var S=[
+          {lbl:'offset −8', win:16.7, mar:'−2.64', rank:'~32900', acc:20, snap:0,
+           cap:'<strong>Eight tokens out.</strong> The eventual answer is buried and the residual stream cannot tell the five choices apart.'},
+          {lbl:'offset −5', win:31.3, mar:'−2.04', rank:'~13500', acc:20, snap:0,
+           cap:'<strong>Five out.</strong> A flicker of preference in the logits, still nothing in the residual stream.'},
+          {lbl:'offset −3', win:6.3, mar:'−2.07', rank:'~14000', acc:20, snap:0,
+           cap:'<strong>Three out.</strong> The race is genuinely open and even moves the wrong way. Residuals flat.'},
+          {lbl:'offset −2', win:18.8, mar:'−0.84', rank:'~7600', acc:20, snap:0,
+           cap:'<strong>Two out.</strong> The margin tightens but the winner is still usually behind its rival.'},
+          {lbl:'offset −1', win:50.0, mar:'+0.16', rank:'~640', acc:20, snap:0,
+           cap:'<strong>One out.</strong> Tipping point. The eventual answer pulls level in the logits, while residuals are still at chance.'},
+          {lbl:'first answer token', win:52.6, mar:'+0.27', rank:'3', acc:80, snap:0.75,
+           cap:'<strong>It speaks.</strong> The logit lead is slim, but the residual readout jumps to 80% the instant the answer token lands.'},
+          {lbl:'after a few tokens', win:60.0, mar:'+0.50', rank:'1', acc:100, snap:1,
+           cap:'<strong>Committed.</strong> Within four tokens the residual state has snapped fully into the chosen source cluster, 100% readable.'}
+        ];
+        var centers=[[110,55],[250,60],[180,115],[95,120],[270,120]];
+        var seeds=[];
+        for(var i=0;i<5;i++){ for(var j=0;j<4;j++){ seeds.push({c:i, jx:(Math.sin(i*7+j*3)*16), jy:(Math.cos(i*5+j*2)*14)}); } }
+        var mid=[180,90];
+        function render(idx){
+          var s=S[idx];
+          posL.textContent=s.lbl;
+          var x=30 + (s.win/100)*300;
+          knob.setAttribute('cx', x);
+          knob.setAttribute('fill', s.win>=50 ? 'var(--d3)' : 'var(--d4)');
+          winT.textContent = Math.round(s.win)+'% ahead';
+          marT.textContent='median margin '+s.mar;
+          rankT.textContent='vocab rank '+s.rank;
+          accT.textContent = 'readout '+s.acc+'%'+(s.acc<=20?' (chance)':'');
+          dotsG.innerHTML='';
+          seeds.forEach(function(p){
+            var tx=centers[p.c][0]+p.jx*0.4, ty=centers[p.c][1]+p.jy*0.4;
+            var cx=mid[0]+p.jx, cy=mid[1]+p.jy;
+            var X=cx+(tx-cx)*s.snap, Y=cy+(ty-cy)*s.snap;
+            var col = s.snap>0 ? DOC[p.c] : 'var(--ink-faint)';
+            var op = s.snap>0 ? 0.9 : 0.45;
+            dotsG.innerHTML += '<circle cx="'+X.toFixed(1)+'" cy="'+Y.toFixed(1)+'" r="6" fill="'+col+'" opacity="'+op+'" style="transition:all .45s"/>';
+          });
+          cap.innerHTML=s.cap;
+        }
+        range.addEventListener('input', function(){ render(+range.value); });
+        var timer=null;
+        playBtn.addEventListener('click', function(){
+          if(timer){ clearInterval(timer); timer=null; playBtn.textContent='Play'; return; }
+          playBtn.textContent='Pause';
+          var v=0; range.value=0; render(0);
+          timer=setInterval(function(){
+            v++; if(v>6){ clearInterval(timer); timer=null; playBtn.textContent='Play'; return; }
+            range.value=v; render(v);
+          }, 950);
+        });
+        render(0);
+      })();
+    })();
+    </script>
   </body>
 </html>
