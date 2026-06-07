@@ -241,7 +241,7 @@
 
             <p>
               I learned that endpoint axis only from the Doc 1 and Doc 3 forced residuals, then dropped the
-              unseen Doc 2 onto it. Doc 2 landed in between the two ends in <b>94.7%</b> of examples. A real ordering, not a relabeled binary split.
+              unseen Doc 2 onto it. Doc 2 landed in between the two ends in <b>94.7%</b> of examples.
             </p>
 
             <figure class="fig">
@@ -253,9 +253,10 @@
             <h2><span class="n">02</span> It needs more than one axis</h2>
 
             <p>
-              If no single direction is universal, maybe the choice lives in a small subspace instead of on one line. The trick that
-              made it show up was within question centering, subtracting each question's own mean so the analysis stops rediscovering
-              which question you are on. After that, the three sources fall into clean islands.
+              If no single direction is universal, maybe the choice lives in a small subspace instead of on one line. So I did the
+              simplest thing, principal component analysis on the forced residuals, with one tweak. I centered each question first,
+              subtracting its own mean, so the components stop just rediscovering which question you are on and pick up the choice instead.
+              After that, the three sources fall into clean clusters.
             </p>
 
             <div class="twocol">
