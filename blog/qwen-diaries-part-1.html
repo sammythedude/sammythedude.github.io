@@ -288,18 +288,19 @@
             <h2><span class="n">03</span> A line, a plane, or a curve?</h2>
 
             <p>
-              With three points you can always draw a triangle, so of course it looks structured. The real test was five documents. I fit
-              a line, a plane and a 3D structure to the five forced centroids. A line barely explained a third of it. You needed three
-              dimensions before it fit.
+              With three points you can always draw a triangle, so of course it looks structured. The real test was five documents. I ran
+              principal component analysis on the five forced centroids and measured how much of their spread fits in one dimension, then
+              two, then three. That fraction is the R2. One dimension, a line, kept barely a third of it. You needed all three before it
+              fit. Nothing here is a curve fit, the bent line you see in 3D only connects the five points in order.
             </p>
 
             <figure class="viz" id="viz-fit">
               <div class="viz-head">How well does each shape fit the five centroids?</div>
-              <div class="viz-sub">The real Qwen-0.8B centroids. Watch the five documents pile up when you flatten them onto fewer dimensions, then separate into distinct clusters in 3D. Drag to rotate. R2 is the share of their spread that survives.</div>
+              <div class="viz-sub">The real Qwen-0.8B centroids. Watch the five documents pile up when you flatten them onto fewer dimensions, then separate into distinct clusters in 3D. Drag to rotate. R2 is how much of their spread fits in that many dimensions.</div>
               <div class="controls">
                 <button class="btn" data-fit="line">Line</button>
                 <button class="btn" data-fit="plane">Plane</button>
-                <button class="btn active" data-fit="curve">3D curve</button>
+                <button class="btn active" data-fit="curve">3D</button>
                 <span style="flex:1"></span>
                 <span class="slabel" id="fit-r2" style="min-width:5em;">R2 0.914</span>
               </div>
@@ -325,11 +326,11 @@
             <h2><span class="n">04</span> Does free choice land in the same place?</h2>
 
             <p>
-              Everything above was teacher forced, where I forced the model to say each answer, a map of where each answer would put
-              the model. The real test is whether the model walks into those same regions on its own. The distribution a model generates
-              from can differ from the teacher forced one (see Jack Lindsey's
-              <a href="https://transformer-circuits.pub/2025/attribution-graphs/biology.html" target="_blank" rel="noopener">work on the biology of a language model</a>).
-              For little Qwen 0.8B it did anyway, almost every time.
+              Everything above was teacher forced, meaning I made the model say each answer and recorded where it landed. The real question
+              is whether it goes to those same places when it answers freely, since what a model generates on its own can differ from what
+              you force it to say. There is even some evidence that models can tell their own generations apart from text put in their mouth
+              (see Jack Lindsey's <a href="https://transformer-circuits.pub/2025/introspection/index.html" target="_blank" rel="noopener">work on introspective awareness</a>).
+              For Qwen 0.8B it mostly did, almost every time.
             </p>
 
             <div class="result-box">Of 38 classifiable natural answers, <b>92.1%</b> landed nearest to the forced centroid of the document they actually chose. The map drawn by forcing is the same territory the model wanders into freely.</div>
@@ -491,7 +492,7 @@
             </figure>
 
             <p>
-              Basically the entire story of what happens is this. Before generation the residual state is undecided and the logits hold a
+              Basically the entire story of what happens is this: before generation the residual state is undecided and the logits hold a
               soft, wobbling preference. The eventual answer does not even reliably beat its single strongest rival until a token before it is emitted.
               Then the answer token enters the context and the hidden state snaps into a source specific region.
             </p>
@@ -605,7 +606,7 @@
                 <li>Goodfire, <em><a href="https://arxiv.org/abs/2505.18235" target="_blank" rel="noopener">The Origins of Representation Manifolds in Large Language Models</a></em>. Linear features as slices through curved manifolds.</li>
                 <li>Goodfire, <em><a href="https://www.lesswrong.com/posts/87iDbBM3Qaf4q4gN4/the-future-of-interpretability-is-geometric" target="_blank" rel="noopener">The Future of Interpretability is Geometric</a></em>. Circular and curved concept manifolds.</li>
                 <li>Elhage et al., <em><a href="https://transformer-circuits.pub/2021/framework/index.html" target="_blank" rel="noopener">A Mathematical Framework for Transformer Circuits</a></em>. Superposition and function composition over attention and MLP chains.</li>
-                <li>Lindsey et al., <em><a href="https://transformer-circuits.pub/2025/attribution-graphs/biology.html" target="_blank" rel="noopener">On the Biology of a Large Language Model</a></em>, on how generation can differ from forced behavior.</li>
+                <li>J. Lindsey, <em><a href="https://transformer-circuits.pub/2025/introspection/index.html" target="_blank" rel="noopener">Emergent Introspective Awareness in Large Language Models</a></em>, on models having some access to their own internal states and outputs.</li>
                 <li>All numbers here are small sample. The five point helix diagnostics use only five centroids, and the larger model natural readout was measured at the Qwen tuned layer and position and has not been swept.</li>
               </ol>
             </div>
