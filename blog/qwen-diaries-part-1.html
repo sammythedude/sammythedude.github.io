@@ -288,9 +288,9 @@
             <h2><span class="n">03</span> A line, a plane, or a curve?</h2>
 
             <p>
-              With three points you can always draw a triangle, so of course it looks structured. The question that made this project
-              better was, what about five. Is it a line, a flat patch, or something curved. I fit line, plane and 3D structure to the
-              five forced centroids. A line barely explained a third of it. You needed three dimensions before it fit.
+              With three points you can always draw a triangle, so of course it looks structured. The real test was five documents. I fit
+              a line, a plane and a 3D structure to the five forced centroids. A line barely explained a third of it. You needed three
+              dimensions before it fit.
             </p>
 
             <figure class="viz" id="viz-fit">
@@ -310,8 +310,8 @@
             </figure>
 
             <p>
-              Here are those five forced centroids in the first three principal components. This plot is what made me think the extra
-              dimensions were really explaining the separation. In two dimensions Doc 4 and Doc 5 were almost on top of each other, a
+              Here are those five forced centroids in the first three principal components. The higher principal components are what carry
+              the separation. In two dimensions Doc 4 and Doc 5 were almost on top of each other, a
               centroid distance of just <b>0.168</b>. The third axis pulls them apart to <b>0.468</b>. The structure was there, it just
               was not visible in lower dimensions.
             </p>
@@ -432,9 +432,10 @@
             </figure>
 
             <p>
-              I read the choice out with a leave one question out SVM at each of those positions. The answer was nothing, then everything.
-              I also thought maybe a stronger non linear separator could pick up a readout earlier, but the SVM only performed strongly at
-              the decision token, the same as my linear probe. Neel Nanda was right, simple is usually good.
+              I read the choice out with a leave one question out SVM at each of those positions. Before the answer it was at chance, and
+              at the answer token it was suddenly readable. I also thought maybe a stronger non linear separator could pick up a readout
+              earlier, but the SVM only performed strongly at the decision token, the same as my linear probe. Neel Nanda was right, simple
+              probes are usually good.
             </p>
 
             <figure class="fig">
@@ -490,8 +491,8 @@
             </figure>
 
             <p>
-              That is the whole story in one widget. Before generation the residual state is undecided and the logits hold a soft, wobbling
-              preference. The eventual answer does not even reliably beat its single strongest rival until a token before it is emitted.
+              Basically the entire story of what happens is this. Before generation the residual state is undecided and the logits hold a
+              soft, wobbling preference. The eventual answer does not even reliably beat its single strongest rival until a token before it is emitted.
               Then the answer token enters the context and the hidden state snaps into a source specific region.
             </p>
 
@@ -563,7 +564,7 @@
               That single run is not a special case. Averaged over all the questions, the eventual answer only becomes easy to read in the
               logits in the last token or two. The residual side, which I have cached for every position, tells the same story from the other
               direction. The choice is unreadable through the whole prompt, sitting at chance, and only snaps to readable once the answer
-              tokens start, climbing to near perfect within the first four. The two clocks line up almost exactly.
+              tokens start, climbing to near perfect within the first four. The two methods, the logit competition and the residual readout, line up almost exactly.
             </p>
 
             <figure class="fig">
