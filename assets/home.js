@@ -61,7 +61,7 @@
         el.textContent = Math.random() > .36 ? randomFrom(alphabet) : '·';
         el.style.left = `${pixelX}px`;
         el.style.top = `${pixelY}px`;
-        el.style.opacity = String(.22 + Math.random() * .7);
+        el.style.opacity = String(.3 + Math.random() * .66);
         fragment.appendChild(el);
         characters.push({ el, x: pixelX, y: pixelY });
       }
