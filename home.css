@@ -8,7 +8,7 @@
   --muted: #878d96; --faint: #555b64; --line: #30343b;
   --interp: #91c5a2; --interp-soft: rgba(145, 197, 162, .08);
   --bio: #e3a06b; --bio-soft: rgba(227, 160, 107, .08);
-  --char: rgba(189, 198, 207, .055); --char-hot: rgba(145, 197, 162, .20);
+  --char: rgba(189, 198, 207, .072); --char-hot: rgba(145, 197, 162, .25);
 }
 
 :root[data-theme="light"] {
@@ -17,13 +17,13 @@
   --muted: #737b76; --faint: #a2a8a3; --line: #d6d4cc;
   --interp: #276e4d; --interp-soft: rgba(39, 110, 77, .07);
   --bio: #a5561f; --bio-soft: rgba(165, 86, 31, .07);
-  --char: rgba(31, 42, 35, .04); --char-hot: rgba(39, 110, 77, .14);
+  --char: rgba(31, 42, 35, .052); --char-hot: rgba(39, 110, 77, .18);
 }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; min-height: 100vh; isolation: isolate; background: var(--bg); color: var(--text); font: 400 13px/1.55 "Roboto Mono", ui-monospace, monospace; transition: background .25s, color .25s; }
-body::before { content: ""; position: fixed; inset: 54px 0 0; z-index: -1; pointer-events: none; background: radial-gradient(ellipse 76% 64% at 58% 40%, color-mix(in srgb, var(--bg) 82%, transparent) 0%, color-mix(in srgb, var(--bg) 68%, transparent) 38%, color-mix(in srgb, var(--bg) 36%, transparent) 67%, transparent 88%); backdrop-filter: blur(.55px); }
+body::before { content: ""; position: fixed; inset: 54px 0 0; z-index: -1; pointer-events: none; background: radial-gradient(ellipse 82% 72% at 56% 40%, color-mix(in srgb, var(--bg) 76%, transparent) 0%, color-mix(in srgb, var(--bg) 71%, transparent) 24%, color-mix(in srgb, var(--bg) 59%, transparent) 43%, color-mix(in srgb, var(--bg) 41%, transparent) 62%, color-mix(in srgb, var(--bg) 20%, transparent) 78%, transparent 94%); backdrop-filter: blur(.65px); }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; }
 ::selection { background: var(--interp); color: var(--bg); }
@@ -33,8 +33,8 @@ button { font: inherit; }
 .scramble-char.hot { color: var(--char-hot); opacity: .72 !important; text-shadow: 0 0 8px currentColor; }
 .message-matrix { --matrix-cols: 36; position: absolute; z-index: 3; display: grid; grid-template-columns: repeat(var(--matrix-cols), 8px); grid-auto-rows: 12px; width: max-content; translate: -50% -50%; opacity: 0; letter-spacing: 0; mask-image: radial-gradient(ellipse 82% 92% at center, #000 7%, rgba(0,0,0,.78) 34%, rgba(0,0,0,.46) 61%, rgba(0,0,0,.14) 83%, transparent 100%); }
 .message-matrix.is-revealing { animation: matrix-resolve 3.6s ease-in-out both; }
-.matrix-cell { width: 8px; height: 12px; color: var(--char); font-size: 8px; line-height: 12px; text-align: center; opacity: .19; }
-.matrix-cell.matrix-letter { color: color-mix(in srgb, var(--interp) 62%, var(--ink)); opacity: .64; font-weight: 700; text-shadow: 0 0 4px color-mix(in srgb, var(--interp) 28%, transparent); animation: matrix-letter-glow 1.7s ease-in-out infinite; }
+.matrix-cell { width: 8px; height: 12px; color: var(--char); font-size: 8px; line-height: 12px; text-align: center; opacity: .22; }
+.matrix-cell.matrix-letter { color: color-mix(in srgb, var(--interp) 62%, var(--ink)); opacity: .68; font-weight: 700; text-shadow: 0 0 4px color-mix(in srgb, var(--interp) 28%, transparent); animation: matrix-letter-glow 1.7s ease-in-out infinite; }
 .message-matrix.is-warm .matrix-letter { color: color-mix(in srgb, var(--bio) 60%, var(--ink)); text-shadow: 0 0 4px color-mix(in srgb, var(--bio) 26%, transparent); }
 @keyframes matrix-resolve {
   0% { opacity: 0; }
