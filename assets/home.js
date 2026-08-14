@@ -126,9 +126,9 @@
     dissolveMessage();
     const message = nextMessage();
     const { columns, rows } = fillMessageMatrix(message);
-    const halfWidth = columns * 4;
+    const halfWidth = columns * 4.5;
     const safeX = Math.max(halfWidth + 12, Math.min(innerWidth - halfWidth - 12, centerX));
-    const halfHeight = rows * 6;
+    const halfHeight = rows * 6.5;
     const safeY = Math.max(halfHeight + 12, Math.min(innerHeight - halfHeight - 12, centerY));
     const warm = easterEggs.indexOf(message) % 2 === 1;
     messageElement.dataset.message = message;
