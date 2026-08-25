@@ -16,13 +16,18 @@
     'i play jazz guitar btw'
   ];
   let characters = [];
+  let characterGrid = new Map();
+  let activeHotCharacters = new Set();
+  let fieldSpacing = { x: 40, y: 30 };
   let messageElement;
   let matrixCells = [];
+  let matrixNoiseCells = [];
   let messageQueue = [];
   let hoverTimer;
   let dissolveTimer;
   let messageOrigin = null;
   let pointer = { x: -999, y: -999 };
+  let pointerDirty = true;
   let lastTick = 0;
 
   function setTheme(theme) {
@@ -49,11 +54,18 @@
     messageOrigin = null;
     field.replaceChildren();
     characters = [];
+    characterGrid = new Map();
+    activeHotCharacters = new Set();
+    matrixCells = [];
+    matrixNoiseCells = [];
     const spacingX = innerWidth < 700 ? 33 : 40;
     const spacingY = 30;
+    fieldSpacing = { x: spacingX, y: spacingY };
     const fragment = document.createDocumentFragment();
-    for (let y = 18; y < innerHeight + spacingY; y += spacingY) {
-      for (let x = 18; x < innerWidth + spacingX; x += spacingX) {
+    let row = 0;
+    for (let y = 18; y < innerHeight + spacingY; y += spacingY, row += 1) {
+      let column = 0;
+      for (let x = 18; x < innerWidth + spacingX; x += spacingX, column += 1) {
         const el = document.createElement('span');
         const pixelX = x + (Math.random() * 7 - 3.5);
         const pixelY = y + (Math.random() * 5 - 2.5);
@@ -63,13 +75,16 @@
         el.style.top = `${pixelY}px`;
         el.style.opacity = String(.3 + Math.random() * .66);
         fragment.appendChild(el);
-        characters.push({ el, x: pixelX, y: pixelY });
+        const item = { el, x: pixelX, y: pixelY };
+        characters.push(item);
+        characterGrid.set(`${column}:${row}`, item);
       }
     }
     messageElement = document.createElement('div');
     messageElement.className = 'message-matrix';
     fragment.appendChild(messageElement);
     field.appendChild(fragment);
+    pointerDirty = true;
   }
 
   function nextMessage() {
@@ -118,6 +133,7 @@
     }
     messageElement.style.setProperty('--matrix-cols', columns);
     messageElement.replaceChildren(fragment);
+    matrixNoiseCells = matrixCells.filter((cell) => !cell.isLetter);
     return { columns, rows };
   }
 
@@ -141,19 +157,47 @@
     dissolveTimer = setTimeout(dissolveMessage, 3400);
   }
 
+  function refreshHotCharacters() {
+    const nextHot = new Set();
+    if (pointer.x >= 0 && pointer.y >= 0) {
+      const centerColumn = Math.round((pointer.x - 18) / fieldSpacing.x);
+      const centerRow = Math.round((pointer.y - 18) / fieldSpacing.y);
+      const columnRadius = Math.ceil(135 / fieldSpacing.x) + 1;
+      const rowRadius = Math.ceil(135 / fieldSpacing.y) + 1;
+      for (let row = centerRow - rowRadius; row <= centerRow + rowRadius; row += 1) {
+        for (let column = centerColumn - columnRadius; column <= centerColumn + columnRadius; column += 1) {
+          const item = characterGrid.get(`${column}:${row}`);
+          if (item && Math.hypot(item.x - pointer.x, item.y - pointer.y) < 135) nextHot.add(item);
+        }
+      }
+    }
+    activeHotCharacters.forEach((item) => {
+      if (!nextHot.has(item)) item.el.classList.remove('hot');
+    });
+    nextHot.forEach((item) => {
+      if (!activeHotCharacters.has(item)) item.el.classList.add('hot');
+    });
+    activeHotCharacters = nextHot;
+    pointerDirty = false;
+  }
+
   function animateField(time) {
     if (time - lastTick > 70) {
-      characters.forEach((item) => {
-        const distance = Math.hypot(item.x - pointer.x, item.y - pointer.y);
-        const hot = distance < 135;
-        item.el.classList.toggle('hot', hot);
-        if (hot && Math.random() > .55) item.el.textContent = randomFrom(alphabet);
-        else if (Math.random() > .992) item.el.textContent = randomFrom(alphabet);
+      if (pointerDirty) refreshHotCharacters();
+      activeHotCharacters.forEach((item) => {
+        if (Math.random() > .55) item.el.textContent = randomFrom(alphabet);
       });
-      if (messageElement) {
-        matrixCells.forEach((cell) => {
-          if (!cell.isLetter && Math.random() > .58) cell.element.textContent = randomFrom(alphabet);
-        });
+      const driftUpdates = Math.max(1, Math.round(characters.length / 550));
+      for (let index = 0; index < driftUpdates; index += 1) {
+        const item = characters[Math.floor(Math.random() * characters.length)];
+        if (item && !activeHotCharacters.has(item)) item.el.textContent = randomFrom(alphabet);
+      }
+      if (messageElement && messageElement.classList.contains('is-revealing')) {
+        const noiseUpdates = Math.min(12, matrixNoiseCells.length);
+        for (let index = 0; index < noiseUpdates; index += 1) {
+          const cell = matrixNoiseCells[Math.floor(Math.random() * matrixNoiseCells.length)];
+          if (cell) cell.element.textContent = randomFrom(alphabet);
+        }
       }
       lastTick = time;
     }
@@ -162,6 +206,7 @@
 
   addEventListener('pointermove', (event) => {
     pointer = { x: event.clientX, y: event.clientY };
+    pointerDirty = true;
     clearTimeout(hoverTimer);
     if (messageOrigin && Math.hypot(pointer.x - messageOrigin.x, pointer.y - messageOrigin.y) > 12) dissolveMessage();
     hoverTimer = setTimeout(() => formMessage(pointer.x, pointer.y), 2100);
@@ -170,6 +215,7 @@
     clearTimeout(hoverTimer);
     dissolveMessage();
     pointer = { x: -999, y: -999 };
+    pointerDirty = true;
   });
   addEventListener('resize', buildField, { passive: true });
   buildField();

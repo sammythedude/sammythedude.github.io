@@ -23,12 +23,12 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; min-height: 100vh; isolation: isolate; background: var(--bg); color: var(--text); font: 400 13px/1.55 "Roboto Mono", ui-monospace, monospace; transition: background .25s, color .25s; }
-body::before { content: ""; position: fixed; inset: 54px 0 0; z-index: -1; pointer-events: none; opacity: var(--veil-opacity); background: radial-gradient(ellipse 82% 72% at 56% 40%, color-mix(in srgb, var(--bg) 64%, transparent) 0%, color-mix(in srgb, var(--bg) 60%, transparent) 24%, color-mix(in srgb, var(--bg) 50%, transparent) 43%, color-mix(in srgb, var(--bg) 34%, transparent) 62%, color-mix(in srgb, var(--bg) 16%, transparent) 78%, transparent 94%); backdrop-filter: blur(.35px); }
+body::before { content: ""; position: fixed; inset: 54px 0 0; z-index: -1; pointer-events: none; opacity: var(--veil-opacity); background: radial-gradient(ellipse 82% 72% at 56% 40%, color-mix(in srgb, var(--bg) 64%, transparent) 0%, color-mix(in srgb, var(--bg) 60%, transparent) 24%, color-mix(in srgb, var(--bg) 50%, transparent) 43%, color-mix(in srgb, var(--bg) 34%, transparent) 62%, color-mix(in srgb, var(--bg) 16%, transparent) 78%, transparent 94%); }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; }
 ::selection { background: var(--interp); color: var(--bg); }
 
-.scramble-field { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; color: var(--char); font-size: 11px; line-height: 18px; letter-spacing: 8px; user-select: none; }
+.scramble-field { position: fixed; inset: 0; z-index: -2; overflow: hidden; contain: strict; pointer-events: none; color: var(--char); font-size: 11px; line-height: 18px; letter-spacing: 8px; user-select: none; }
 .scramble-char { position: absolute; width: 12px; height: 18px; text-align: center; transition: color 140ms ease, opacity 140ms ease, text-shadow 140ms ease; }
 .scramble-char.hot { color: var(--char-hot); opacity: .72 !important; text-shadow: 0 0 8px currentColor; }
 .message-matrix { --matrix-cols: 36; position: absolute; z-index: 3; display: grid; grid-template-columns: repeat(var(--matrix-cols), 9px); grid-auto-rows: 13px; width: max-content; translate: -50% -50%; opacity: 0; letter-spacing: 0; mask-image: radial-gradient(ellipse 82% 92% at center, #000 7%, rgba(0,0,0,.78) 34%, rgba(0,0,0,.46) 61%, rgba(0,0,0,.14) 83%, transparent 100%); }
@@ -126,7 +126,7 @@ body.lit-interp .bio, body.lit-bio .interp { opacity: .28; text-shadow: none; }
 .post-meta { display: flex; justify-content: space-between; color: var(--faint); font-size: 8px; text-transform: uppercase; }
 .post-meta span { color: var(--muted); }
 .accepted-post .post-meta span { color: var(--interp); font-weight: 700; }
-.accepted-post { padding-left: 12px; box-shadow: inset 2px 0 0 var(--interp); }
+.accepted-post { padding-left: 4px; }
 .blog-post { border-top-style: dashed; }
 .post-kicker { margin-top: 16px; color: var(--muted); font-size: 8px; letter-spacing: .05em; text-transform: uppercase; }
 .post-entry h3 { margin: 6px 0 4px; color: var(--ink); font-size: 14px; line-height: 1.2; }
@@ -134,7 +134,7 @@ body.lit-interp .bio, body.lit-bio .interp { opacity: .28; text-shadow: none; }
 .post-entry p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.45; }
 .post-footer { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: auto; color: var(--faint); font-size: 8px; }
 .post-footer b { color: var(--muted); font-weight: 400; }
-body.lit-interp .linked-interp { background: var(--interp-soft); border-color: color-mix(in srgb, var(--interp) 62%, var(--line)); box-shadow: inset 2px 0 0 var(--interp), 0 0 18px -12px var(--interp); }
+body.lit-interp .linked-interp { background: var(--interp-soft); border-color: color-mix(in srgb, var(--interp) 62%, var(--line)); box-shadow: 0 0 18px -12px var(--interp); }
 .dual-tags { display: flex; gap: 5px; }
 a.row:hover { background: var(--interp-soft); }
 .row time { color: var(--faint); font-size: 9px; text-transform: uppercase; }
