@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Samuel Dawit Assefa — applied interpretability and applied AI research.">
     <title>Samuel Dawit Assefa</title>
-    <link rel="stylesheet" href="/home.css?v=5">
+    <link rel="stylesheet" href="/home.css?v=6">
   </head>
   <body>
     <div class="scramble-field" aria-hidden="true"></div>
@@ -14,8 +14,8 @@
     <header class="topbar">
       <a class="wordmark" href="#top"><span class="prompt">~/</span> samuel.dawit</a>
       <nav aria-label="Primary navigation">
-        <a href="#work">work</a>
-        <a href="#research">research</a>
+        <a href="#work" data-signal="work">work</a>
+        <a href="#latest" data-signal="research">research</a>
         <a href="/blog/">blog</a>
         <a href="/assets/Samuel_Dawit_Assefa_CV.pdf?v=2">cv</a>
       </nav>
@@ -62,29 +62,30 @@
         </section>
 
         <div class="information-grid">
-          <section class="pane latest" aria-labelledby="latest-title">
+          <section class="pane latest signal-target" id="latest" aria-labelledby="latest-title">
             <div class="pane-title"><h2 id="latest-title"><span>01</span> latest</h2><a href="/blog/">all →</a></div>
             <div class="latest-posts">
-              <a class="post-entry accepted-post" href="https://openreview.net/forum?id=ldaR8qyupo&amp;noteId=ldaR8qyupo">
-                <div class="post-meta"><span>[ accepted ]</span><time>jun 2026</time></div>
+              <a class="post-entry accepted-post linked-interp" href="https://openreview.net/forum?id=ldaR8qyupo&amp;noteId=ldaR8qyupo">
+                <div class="post-meta"><span>[ paper · accepted ]</span><time>jun 2026</time></div>
+                <div class="post-kicker">ICML 2026 · AI4GOOD</div>
                 <h3>Hidden Commitment</h3>
-                <p>My first-author paper was accepted to the AI4GOOD workshop at ICML 2026 🎉</p>
-                <b>open paper ↗</b>
+                <p>First-author paper accepted to the AI4GOOD workshop at ICML 2026 🎉</p>
+                <div class="post-footer"><span class="interp">[interpretability]</span><b>open paper ↗</b></div>
               </a>
-              <a class="post-entry" href="/blog/qwen-diaries-part-1.html">
-                <div class="post-meta"><span>[ research log ]</span><time>may 2026</time></div>
+              <a class="post-entry blog-post" href="/blog/qwen-diaries-part-1.html">
+                <div class="post-meta"><span>[ research log · 01 ]</span><time>may 2026</time></div>
                 <h3>Qwen Diaries, Part 1</h3>
                 <p>When does a small model decide which source to answer from?</p>
-                <b>read post →</b>
+                <div class="post-footer"><span>[blog]</span><b>read post →</b></div>
               </a>
             </div>
           </section>
 
-          <section class="pane" id="work" aria-labelledby="work-title">
+          <section class="pane signal-target" id="work" aria-labelledby="work-title">
             <div class="pane-title"><h2 id="work-title"><span>02</span> work</h2></div>
-            <div class="row"><time>2025—26</time><span><strong>AI Engineer Intern</strong><small>PuzzleAI</small></span><span class="dual-tags"><em class="interp">[interp]</em><em class="bio">[medical]</em></span></div>
-            <div class="row"><time>2025—now</time><span><strong>Researcher</strong><small>Biomedical Optics Lab, KAIST</small></span><em class="bio">[med]</em></div>
-            <div class="row"><time>2024—25</time><span><strong>Research Intern</strong><small>KIXLAB</small></span><em>[hci]</em></div>
+            <a class="row" href="https://www.puzzle-ai.com/en" target="_blank" rel="noopener noreferrer"><time>2025—26</time><span><strong>AI Engineer Intern</strong><small>PuzzleAI</small></span><span class="dual-tags"><em class="interp">[interp]</em><em class="bio">[medical]</em></span><b aria-hidden="true">↗</b></a>
+            <a class="row" href="https://bmokaist.wordpress.com/" target="_blank" rel="noopener noreferrer"><time>2025—now</time><span><strong>Researcher</strong><small>Biomedical Optics Lab, KAIST</small></span><em class="bio">[med]</em><b aria-hidden="true">↗</b></a>
+            <a class="row" href="https://www.kixlab.org/" target="_blank" rel="noopener noreferrer"><time>2024—25</time><span><strong>Research Intern</strong><small>KIXLAB</small></span><em>[hci]</em><b aria-hidden="true">↗</b></a>
           </section>
 
         </div>
@@ -92,6 +93,6 @@
     </main>
 
     <footer><span>samuelassefa@kaist.ac.kr</span><span>daejeon, south korea</span></footer>
-    <script src="/assets/home.js?v=3"></script>
+    <script src="/assets/home.js?v=4"></script>
   </body>
 </html>
