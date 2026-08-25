@@ -188,6 +188,7 @@
   document.querySelectorAll('.scramble').forEach((element) => {
     const original = element.textContent;
     const reveal = element.dataset.scramble || original;
+    element.style.setProperty('--scramble-width', `${Math.max(original.length, reveal.length)}ch`);
     let timer;
     const run = (target, frames) => {
       clearInterval(timer);
@@ -200,6 +201,25 @@
     };
     element.addEventListener('mouseenter', () => run(reveal, 8));
     element.addEventListener('mouseleave', () => run(original, 6));
+  });
+
+  const signalTargets = {
+    research: document.querySelector('#latest'),
+    work: document.querySelector('#work')
+  };
+  let signalTimer;
+
+  function runSignalSweep(target) {
+    if (!target) return;
+    clearTimeout(signalTimer);
+    document.querySelectorAll('.signal-target.is-signaling').forEach((section) => section.classList.remove('is-signaling'));
+    void target.offsetWidth;
+    target.classList.add('is-signaling');
+    signalTimer = setTimeout(() => target.classList.remove('is-signaling'), 1450);
+  }
+
+  document.querySelectorAll('.topbar nav [data-signal]').forEach((link) => {
+    link.addEventListener('click', () => requestAnimationFrame(() => runSignalSweep(signalTargets[link.dataset.signal])));
   });
 
   const title = document.querySelector('.intro-scramble');

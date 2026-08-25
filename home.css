@@ -87,6 +87,7 @@ body.theme-switching .theme-wipe { animation: dither-switch .62s steps(8, end); 
 h1 { min-height: 1.25em; margin: 9px 0 12px; color: var(--ink); font: 700 25px/1.25 "Adwa", "Roboto Mono", monospace; }
 .plain-intro { max-width: 800px; margin: 0; color: var(--text); font-size: clamp(15px, 1.5vw, 18px); line-height: 1.55; letter-spacing: -.02em; }
 .plain-intro .interp, .plain-intro .bio { font-weight: 700; cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; }
+.plain-intro .scramble { display: inline-block; width: var(--scramble-width); white-space: nowrap; }
 .interp { color: var(--interp); }
 .bio { color: var(--bio); }
 .bio-line { max-width: 810px; margin: 9px 0 0; color: var(--muted); font-size: 12px; }
@@ -101,6 +102,15 @@ body.lit-interp .bio, body.lit-bio .interp { opacity: .28; text-shadow: none; }
 
 .information-grid { display: grid; grid-template-columns: 1fr; }
 .pane { min-width: 0; padding: 14px 0 12px; }
+.signal-target { --signal-color: var(--interp); position: relative; isolation: isolate; }
+#work.signal-target { --signal-color: color-mix(in srgb, var(--interp) 52%, var(--bio)); }
+.signal-target::before, .signal-target::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; }
+.signal-target::before { background: linear-gradient(90deg, transparent 0 39%, color-mix(in srgb, var(--signal-color) 11%, transparent) 47%, color-mix(in srgb, var(--signal-color) 18%, transparent) 50%, color-mix(in srgb, var(--signal-color) 11%, transparent) 53%, transparent 61% 100%); }
+.signal-target::after { background-image: radial-gradient(circle, var(--signal-color) 0 1px, transparent 1.5px); background-size: 25px 21px; mask-image: linear-gradient(90deg, transparent 0, #000 40%, #000 60%, transparent 100%); }
+.signal-target.is-signaling::before { animation: signal-sweep 1.25s steps(12, end) both; }
+.signal-target.is-signaling::after { animation: signal-pixels 1.25s steps(12, end) both; }
+@keyframes signal-sweep { 0% { opacity: 0; transform: translateX(-62%); } 18% { opacity: .55; } 72% { opacity: .42; } 100% { opacity: 0; transform: translateX(62%); } }
+@keyframes signal-pixels { 0% { opacity: 0; transform: translateX(-58%); } 22% { opacity: .18; } 48% { opacity: .58; } 76% { opacity: .2; } 100% { opacity: 0; transform: translateX(58%); } }
 .pane + .pane { border-top: 1px solid var(--line); }
 .pane.latest { width: 100%; padding-top: 17px; padding-bottom: 18px; }
 .pane-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
@@ -108,7 +118,7 @@ body.lit-interp .bio, body.lit-bio .interp { opacity: .28; text-shadow: none; }
 .pane-title h2 span { color: var(--faint); margin-right: 6px; font-weight: 400; }
 .pane-title > a { color: var(--muted); font-size: 10px; }
 .pane-title > a:hover { color: var(--ink); }
-.row { min-height: 47px; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 4px; border-top: 1px solid var(--line); }
+.row { min-height: 47px; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto 12px; gap: 10px; align-items: center; padding: 7px 4px; border-top: 1px solid var(--line); }
 #work .row { border-top: 0; padding-top: 9px; padding-bottom: 9px; }
 .latest-posts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .post-entry { position: relative; min-height: 142px; display: flex; flex-direction: column; padding: 12px 4px 10px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); transition: background .18s, border-color .18s; }
@@ -116,15 +126,22 @@ body.lit-interp .bio, body.lit-bio .interp { opacity: .28; text-shadow: none; }
 .post-meta { display: flex; justify-content: space-between; color: var(--faint); font-size: 8px; text-transform: uppercase; }
 .post-meta span { color: var(--muted); }
 .accepted-post .post-meta span { color: var(--interp); font-weight: 700; }
-.post-entry h3 { margin: 22px 0 4px; color: var(--ink); font-size: 14px; line-height: 1.2; }
+.accepted-post { padding-left: 12px; box-shadow: inset 2px 0 0 var(--interp); }
+.blog-post { border-top-style: dashed; }
+.post-kicker { margin-top: 16px; color: var(--muted); font-size: 8px; letter-spacing: .05em; text-transform: uppercase; }
+.post-entry h3 { margin: 6px 0 4px; color: var(--ink); font-size: 14px; line-height: 1.2; }
+.blog-post h3 { margin-top: 26px; }
 .post-entry p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.45; }
-.post-entry > b { margin-top: auto; align-self: end; color: var(--muted); font-size: 8px; font-weight: 400; }
+.post-footer { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: auto; color: var(--faint); font-size: 8px; }
+.post-footer b { color: var(--muted); font-weight: 400; }
+body.lit-interp .linked-interp { background: var(--interp-soft); border-color: color-mix(in srgb, var(--interp) 62%, var(--line)); box-shadow: inset 2px 0 0 var(--interp), 0 0 18px -12px var(--interp); }
 .dual-tags { display: flex; gap: 5px; }
 a.row:hover { background: var(--interp-soft); }
 .row time { color: var(--faint); font-size: 9px; text-transform: uppercase; }
 .row strong { display: block; color: var(--text); font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row small { display: block; color: var(--muted); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.row b { color: var(--muted); font-weight: 400; }
+.row b { color: var(--muted); font-weight: 400; opacity: 0; transition: opacity .15s; }
+a.row:hover b, a.row:focus-visible b { opacity: 1; }
 .row em { font-size: 9px; font-style: normal; }
 .row.featured { box-shadow: inset 2px 0 0 var(--interp); padding-left: 9px; }
 
@@ -151,4 +168,6 @@ footer { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 12px 0 
 @media (pointer: coarse), (prefers-reduced-motion: reduce) {
   .scramble-field { opacity: .45; }
   .cursor { animation: none; }
+  .signal-target.is-signaling::before, .signal-target.is-signaling::after { animation: none; }
+  .signal-target.is-signaling::after { opacity: .18; }
 }
